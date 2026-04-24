@@ -1,6 +1,6 @@
-# 🚀 Guia de Deploy GênioPlay (Produção)
+# 🚀 Guia de Deploy GênioPlay (Híbrido: Node.js + PM2 + Redis Docker)
 
-Este guia contém os passos exatos para configurar sua VPS na InterServer e colocar o GênioPlay no ar usando Docker.
+Este guia foi otimizado para VPS com recursos limitados (2GB RAM). Rodaremos o App direto no Linux e apenas o Redis no Docker.
 
 ---
 
@@ -9,7 +9,7 @@ Este guia contém os passos exatos para configurar sua VPS na InterServer e colo
 Acesse sua VPS via terminal:
 ```bash
 ssh root@153.75.244.238
-``` 
+```
 senha: Dagol7-Bikaz0_Nabyd7-Zadog0=Povuk6
 
 Atualize o sistema:
@@ -19,34 +19,28 @@ apt update && apt upgrade -y
 
 ---
 
-## 2. Instalação do Docker e Docker Compose
+## 2. Instalação do Ambiente (Node.js, Docker, PM2)
 
-Execute o script oficial para instalar tudo de uma vez:
+Execute estes comandos para preparar a máquina:
 ```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-```
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
-Verifique se instalou corretamente:
-```bash
-docker --version
-docker compose version
+# Instalar Node.js 20
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
+
+# Instalar PM2
+npm install -g pm2
 ```
 
 ---
 
-## 3. Clonando o Projeto
+## 3. Preparação do Repositório
 
-Se o seu repositório for privado, você precisará gerar uma chave SSH na VPS e adicionar ao seu GitHub/GitLab:
+Clone o projeto e entre na pasta:
 ```bash
-ssh-keygen -t ed25519 -C "vps-genioplay"
-cat ~/.ssh/id_ed25519.pub
-```
-(Copie a chave que aparecer e cole nas "SSH Keys" do seu perfil no GitHub).
-
-Agora, clone o projeto:
-```bash
-git clone git@github.com:SEU_USUARIO/SEU_REPO.git genioplay
+git clone https://github.com/SEU_USUARIO/genioplay.git genioplay
 cd genioplay
 ```
 
@@ -54,45 +48,62 @@ cd genioplay
 
 ## 4. Configurando Variáveis de Ambiente
 
-Crie o arquivo `.env` na VPS:
+Crie o arquivo `.env`:
 ```bash
 nano .env
 ```
-Cole as variáveis reais de produção (DATABASE_URL do Supabase, RESEND_API_KEY, GEMINI_API_KEY, etc).
-*Dica: Use a porta 5432 para a DATABASE_URL do Supabase em conexões diretas.*
-
----
-
-## 5. Build e Lançamento (Docker)
-
-Rode o comando para construir e subir os containers em background:
-```bash
-docker compose up -d --build
-```
-
-Verifique se os logs estão ok:
-```bash
-docker compose logs -f app
+Use o modelo abaixo (substitua o IP pelo seu):
+```env
+DATABASE_URL="sua_url_do_supabase"
+GEMINI_API_KEY="sua_chave"
+REDIS_URL="redis://localhost:6379"
+NEXTAUTH_SECRET="uma_chave_aleatoria"
+NEXTAUTH_URL="http://153.75.244.238"
+NEXT_PUBLIC_APP_URL="http://153.75.244.238"
+RESEND_API_KEY="sua_chave"
+EMAIL_FROM="onboarding@resend.dev"
 ```
 
 ---
 
-## 6. Configurando o Domínio (Nginx + HTTPS)
+## 5. Build e Lançamento
 
-Instale o Nginx e o Certbot:
+**A. Subir o Redis (Docker):**
 ```bash
-apt install nginx certbot python3-certbot-nginx -y
+docker compose up -d
 ```
 
-Crie a configuração do site:
+**B. Instalar e Buildar o App (Direto no Linux):**
+```bash
+npm install
+npx prisma generate
+npm run build
+```
+
+**C. Iniciar com PM2:**
+```bash
+pm2 start npm --name "genioplay" -- start
+```
+
+---
+
+## 6. Configurando Nginx (Acesso via IP)
+
+1. Instale o Nginx:
+```bash
+apt install nginx -y
+```
+
+2. Configure o site:
 ```bash
 nano /etc/nginx/sites-available/genioplay
 ```
 
-Cole este conteúdo (substituindo seu domínio):
+3. Cole este conteúdo:
 ```nginx
 server {
-    server_name genioplay.com.br;
+    listen 80;
+    server_name 153.75.244.238;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -105,25 +116,21 @@ server {
 }
 ```
 
-Ative a configuração e reinicie o Nginx:
+4. Ative e Reinicie:
 ```bash
 ln -s /etc/nginx/sites-available/genioplay /etc/nginx/sites-enabled/
 nginx -t
 systemctl restart nginx
 ```
 
-Gere o certificado SSL gratuito:
-```bash
-certbot --nginx -d genioplay.com.br
-```
-
 ---
 
-## 7. Manutenção
+## 7. Comandos Úteis
 
-*   **Atualizar o código:** `git pull && docker compose up -d --build`
-*   **Ver Logs:** `docker compose logs -f`
-*   **Reiniciar:** `docker compose restart`
+*   **Ver Logs:** `pm2 logs genioplay`
+*   **Reiniciar App:** `pm2 restart genioplay`
+*   **Verificar Status:** `pm2 status`
+*   **Logs do Redis:** `docker compose logs -f redis`
 
 ---
 

@@ -1,23 +1,6 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    environment:
-      - NODE_ENV=production
-      # As variáveis abaixo serão lidas do arquivo .env automaticamente, 
-      # mas podemos reforçar as principais aqui se necessário.
-      - DATABASE_URL=${DATABASE_URL}
-      - DIRECT_URL=${DIRECT_URL}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - REDIS_URL=${REDIS_URL}
-    depends_on:
-      - redis
-
   redis:
     image: redis:7-alpine
     ports:
