@@ -8,8 +8,9 @@ Este guia contém os passos exatos para configurar sua VPS na InterServer e colo
 
 Acesse sua VPS via terminal:
 ```bash
-ssh root@SEU_IP_AQUI
-```
+ssh root@153.75.244.238
+``` 
+senha: Dagol7-Bikaz0_Nabyd7-Zadog0=Povuk6
 
 Atualize o sistema:
 ```bash
