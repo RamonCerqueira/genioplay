@@ -119,31 +119,30 @@ export default function FamilyPage() {
               </div>
             ) : (
               children.map(child => (
-                <motion.div 
-                  key={child.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/20 dark:shadow-none flex items-center justify-between group hover:border-blue-200 transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-[2rem] bg-slate-50 dark:bg-blue-900/20 flex items-center justify-center text-5xl shadow-inner group-hover:scale-110 transition-transform">
-                      {child.avatar || '🎓'}
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-2xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">{child.username}</h3>
-                      <div className="flex items-center gap-2 text-emerald-500">
-                         <CheckCircle2 size={14} />
-                         <span className="text-[10px] font-black uppercase tracking-widest">Conta Ativa</span>
+                <Link key={child.id} href={`/dashboard/students/${child.id}`}>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/20 dark:shadow-none flex items-center justify-between group hover:border-blue-200 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-[2rem] bg-slate-50 dark:bg-blue-900/20 flex items-center justify-center text-5xl shadow-inner group-hover:scale-110 transition-transform">
+                        {child.avatar || '🎓'}
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-2xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">{child.username}</h3>
+                        <div className="flex items-center gap-2 text-emerald-500">
+                           <CheckCircle2 size={14} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Conta Ativa</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="p-3 text-slate-300 hover:text-rose-500 transition-colors">
-                      <Trash2 size={20} />
-                    </button>
-                    <ChevronRight size={24} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                  </div>
-                </motion.div>
+                    <div className="flex items-center gap-2">
+                      <ChevronRight size={24} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </motion.div>
+                </Link>
               ))
             )}
           </div>
