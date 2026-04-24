@@ -16,9 +16,20 @@ export default function StudentStudyPage({ params }: { params: { lessonId: strin
   const [loading, setLoading] = useState(true);
   const [sessionId, setSessionId] = useState<string>('');
 
-  // Simula início de sessão (no futuro viria do DB)
+  // Inicia sessão real no banco de dados
   useEffect(() => {
-    setSessionId(Math.random().toString(36).substring(7));
+    const initSession = async () => {
+      try {
+        const res = await fetch('/api/study/start-session', { method: 'POST' });
+        const data = await res.json();
+        if (data.sessionId) setSessionId(data.sessionId);
+      } catch (err) {
+        console.error('Erro ao iniciar sessão:', err);
+      }
+    };
+
+    initSession();
+
     fetch(`/api/student/lessons/${params.lessonId}`)
       .then(res => res.json())
       .then(data => {
