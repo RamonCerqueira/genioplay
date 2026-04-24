@@ -8,24 +8,22 @@ import HeroAnimation from './HeroAnimation';
 
 export default function HeroSection() {
   return (
-    <section className="relative pt-40 pb-32 px-6 overflow-hidden">
+    <section className="relative pt-48 pb-32 px-8 overflow-hidden">
       {/* Mesh Gradient Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30 dark:opacity-20">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-500 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
       </div>
 
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-10 relative z-10"
+          className="space-y-12 relative z-10"
         >
-          <div className="inline-flex items-center gap-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md px-5 py-2 rounded-full border border-blue-100 dark:border-slate-700 shadow-sm">
-            <div className="flex -space-x-1">
-               <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-            </div>
+          <div className="inline-flex items-center gap-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-blue-100 dark:border-slate-700 shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">O Futuro da Educação Familiar</span>
           </div>
 
@@ -42,7 +40,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <Link 
               href="/auth/register" 
-              className="group relative bg-blue-600 hover:bg-blue-700 text-white font-black py-5 px-10 rounded-[2rem] transition-all duration-300 shadow-2xl shadow-blue-500/40 active:scale-95 flex items-center justify-center gap-3 w-full sm:w-auto text-xl overflow-hidden"
+              className="group relative bg-blue-600 hover:bg-blue-700 text-white font-black py-5 px-10 rounded-[2rem] transition-all duration-300 shadow-2xl shadow-blue-500/40 active:scale-95 flex items-center justify-center gap-3 w-full sm:w-auto text-xl overflow-hidden uppercase tracking-widest"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               Começar Agora
@@ -50,19 +48,19 @@ export default function HeroSection() {
             </Link>
             
             <div className="flex flex-col gap-2">
-               <div className="flex items-center gap-2">
+               <div className="flex items-center gap-3">
                   <div className="flex -space-x-3">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 bg-slate-200 overflow-hidden">
-                        <img src={`https://i.pravatar.cc/100?u=${i}`} alt="User" />
+                      <div key={i} className="w-12 h-12 rounded-full border-4 border-white dark:border-slate-900 bg-slate-200 overflow-hidden shadow-sm">
+                        <img src={`https://i.pravatar.cc/100?u=${i+10}`} alt="User" />
                       </div>
                     ))}
                   </div>
                   <div className="flex text-orange-400">
-                     {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="currentColor" />)}
+                     {[1,2,3,4,5].map(i => <Star key={i} size={16} fill="currentColor" />)}
                   </div>
                </div>
-               <p className="text-xs font-black text-slate-400 uppercase tracking-widest">+2.500 famílias ativas</p>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+2.500 famílias ativas</p>
             </div>
           </div>
 
