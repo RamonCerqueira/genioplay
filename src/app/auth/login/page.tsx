@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { GraduationCap, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,7 +21,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -60,15 +60,15 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Usuário</label>
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Seu E-mail</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input
-                type="text"
+                type="email"
                 className="input-field !pl-12"
-                placeholder="ex: joao_silva"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="ex: voce@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>

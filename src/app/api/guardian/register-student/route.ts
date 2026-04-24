@@ -10,18 +10,33 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { username, password, birthDate } = await request.json();
+    const { username, password, birthDate, email } = await request.json();
 
     // Validação simples
-    const existing = await prisma.user.findUnique({ where: { username } });
-    if (existing) return NextResponse.json({ error: 'Nome de usuário já existe' }, { status: 400 });
+    const existing = await prisma.user.findFirst({ 
+      where: { 
+        OR: [
+          { username },
+          { email: email || undefined }
+        ]
+      } 
+    });
+    
+    if (existing) {
+      return NextResponse.json({ 
+        error: existing.username === username ? 'Nome de usuário já existe' : 'E-mail já cadastrado' 
+      }, { status: 400 });
+    }
 
-    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    const passwordHash = password 
+      ? crypto.createHash('sha256').update(password).digest('hex')
+      : crypto.randomBytes(20).toString('hex'); // Gera senha aleatória para quem vai se cadastrar via link
 
     // Criação atômica do Estudante e da relação
     const student = await prisma.user.create({
       data: {
         username,
+        email,
         passwordHash,
         role: 'STUDENT',
         birthDate: new Date(birthDate),

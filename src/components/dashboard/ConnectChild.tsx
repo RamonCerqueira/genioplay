@@ -6,16 +6,28 @@ import { UserPlus, Baby, GraduationCap, Copy, Check, ChevronRight, X, AlertCircl
 
 export default function ConnectChild({ guardianId }: { guardianId: string }) {
   const [step, setStep] = useState(1);
-  const [age, setAge] = useState<number | ''>('');
   const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
+    email: '',
     birthDate: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const calculateAge = (dateString: string) => {
+    if (!dateString) return 0;
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   const handleCreateChild = async () => {
     setIsSubmitting(true);
@@ -40,7 +52,8 @@ export default function ConnectChild({ guardianId }: { guardianId: string }) {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/auth/register?ref=${guardianId}`);
+    const inviteUrl = `${window.location.origin}/auth/register?ref=${guardianId}&type=student&email=${formData.email}&birthDate=${formData.birthDate}`;
+    navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -62,28 +75,42 @@ export default function ConnectChild({ guardianId }: { guardianId: string }) {
           >
             <div>
               <h3 className="text-2xl font-black text-slate-800">Conectar Novo Filho</h3>
-              <p className="text-slate-500 font-bold">A segurança começa com o perfil correto.</p>
+              <p className="text-slate-500 font-bold">Inicie o cadastro informando os dados básicos.</p>
             </div>
 
             <div className="space-y-4">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Qual a idade do seu filho(a)?</label>
-              <input 
-                type="number" 
-                placeholder="Ex: 8" 
-                className="input-field"
-                value={age}
-                onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : '')}
-              />
-              <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
-                * Crianças menores de 12 anos têm o perfil gerenciado diretamente por você. 
-                Maiores de 12 anos podem realizar o próprio cadastro via convite seguro.
-              </p>
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Data de Nascimento</label>
+                <input 
+                  type="date" 
+                  className="input-field"
+                  value={formData.birthDate}
+                  onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">E-mail do Filho(a)</label>
+                <input 
+                  type="email" 
+                  placeholder="ex: filho@email.com"
+                  className="input-field"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+                <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
+                  * Usamos o e-mail para validar a conta e enviar convites para maiores de 12 anos.
+                </p>
+              </div>
             </div>
 
             <button 
-              onClick={() => setStep(age && age < 12 ? 2 : 3)}
-              disabled={!age}
-              className="btn-primary w-full"
+              onClick={() => {
+                const age = calculateAge(formData.birthDate);
+                setStep(age > 0 && age < 12 ? 2 : 3);
+              }}
+              disabled={!formData.birthDate || !formData.email}
+              className="btn-primary w-full disabled:opacity-50"
             >
               Continuar <ChevronRight size={20} />
             </button>
@@ -102,29 +129,23 @@ export default function ConnectChild({ guardianId }: { guardianId: string }) {
                <Baby size={28} />
                <h3 className="text-2xl font-black text-slate-800">Perfil Infantil</h3>
             </div>
-            <p className="text-sm text-slate-500 font-bold">Por ser menor de 12 anos, você deve definir o acesso.</p>
+            <p className="text-sm text-slate-500 font-bold">Por ser menor de 12 anos, você deve definir as credenciais de acesso.</p>
 
             <div className="space-y-4">
               {error && <p className="text-xs text-red-500 font-bold text-center">{error}</p>}
               <input 
                 type="text" 
-                placeholder="Nome de usuário do filho" 
+                placeholder="Nome de usuário (ex: joao_genio)" 
                 className="input-field"
                 value={formData.username}
                 onChange={e => setFormData({...formData, username: e.target.value})}
               />
               <input 
                 type="password" 
-                placeholder="Senha de acesso dele(a)" 
+                placeholder="Senha de acesso" 
                 className="input-field"
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
-              />
-              <input 
-                type="date" 
-                className="input-field"
-                value={formData.birthDate}
-                onChange={e => setFormData({...formData, birthDate: e.target.value})}
               />
             </div>
 
@@ -138,7 +159,7 @@ export default function ConnectChild({ guardianId }: { guardianId: string }) {
               </button>
               <button 
                 onClick={handleCreateChild}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !formData.username || !formData.password}
                 className="btn-primary flex-1 disabled:opacity-50"
               >
                 {isSubmitting ? 'Criando...' : 'Criar Perfil'}
@@ -157,30 +178,41 @@ export default function ConnectChild({ guardianId }: { guardianId: string }) {
           >
             <div className="flex items-center gap-3 text-indigo-600">
                <GraduationCap size={28} />
-               <h3 className="text-2xl font-black text-slate-800">Link de Convite</h3>
+               <h3 className="text-2xl font-black text-slate-800">Enviar Convite</h3>
             </div>
-            <p className="text-sm text-slate-500 font-bold">Envie este link para seu filho realizar o cadastro seguro.</p>
+            <p className="text-sm text-slate-500 font-bold">O perfil será criado e o link enviado para <strong>{formData.email}</strong>.</p>
 
             <div className="p-4 bg-white rounded-2xl border border-blue-100 flex items-center justify-between gap-4">
-              <code className="text-xs font-bold text-blue-600 truncate">edutrack.com.br/invite/{guardianId}</code>
+              <code className="text-[10px] font-bold text-blue-600 truncate max-w-[200px]">
+                {window.location.origin}/invite/{guardianId}
+              </code>
               <button 
                 onClick={handleCopy}
-                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all"
+                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all flex items-center gap-1 text-[10px] font-black uppercase"
               >
-                {copied ? <Check size={18} /> : <Copy size={18} />}
+                {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copiado' : 'Link'}
               </button>
             </div>
 
             <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-start gap-3">
               <AlertCircle className="text-amber-600 shrink-0" size={18} />
               <p className="text-[10px] text-amber-700 font-bold leading-relaxed">
-                O cadastro via link vinculará o perfil dele automaticamente ao seu controle parental.
+                Ao se cadastrar, a conta dele será vinculada ao seu painel automaticamente.
               </p>
             </div>
 
-            <button onClick={() => setStep(1)} className="w-full py-3 rounded-2xl border border-slate-200 font-bold text-slate-500 hover:bg-white">
-              Voltar
-            </button>
+            <div className="flex gap-4">
+               <button onClick={() => setStep(1)} className="flex-1 py-3 rounded-2xl border border-slate-200 font-bold text-slate-500 hover:bg-white">
+                  Voltar
+               </button>
+               <button 
+                onClick={handleCreateChild}
+                disabled={isSubmitting}
+                className="btn-primary flex-1 shadow-lg shadow-blue-500/20"
+               >
+                 {isSubmitting ? 'Enviando...' : 'Confirmar & Enviar'}
+               </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

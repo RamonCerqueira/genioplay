@@ -4,9 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { Brain, Coins, Trophy, Zap, Clock, ChevronRight, Star, Flame, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Sidebar from '@/components/layout/Sidebar';
+import MobileNav from '@/components/layout/MobileNav';
 
 export default function StudentDashboard() {
   const [lessons, setLessons] = useState<any[]>([]);
+  const [studentName, setStudentName] = useState('Estudante');
   const [stats, setStats] = useState({
     balance: 0,
     streak: 3,
@@ -20,14 +23,22 @@ export default function StudentDashboard() {
     fetch('/api/student/dashboard-data')
       .then(res => res.json())
       .then(data => {
-        setLessons(data.lessons || []);
-        setStats(prev => ({ ...prev, balance: data.balance || 0 }));
+        if (data) {
+          setLessons(data.lessons || []);
+          setStudentName(data.username || 'Estudante');
+          setStats(prev => ({ ...prev, balance: data.balance || 0 }));
+        }
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <Sidebar role="STUDENT" />
+      
+      <main className="md:ml-72 p-6 md:px-8 xl:px-16 pt-12 pb-32">
+        <div className="max-w-6xl mx-auto space-y-10">
       {/* Header Aluno - Vibe Gamer */}
       <div className="grid md:grid-cols-3 gap-6">
         <motion.div 
@@ -41,7 +52,7 @@ export default function StudentDashboard() {
                   🚀
                </div>
                <div>
-                  <h1 className="text-3xl font-black">Olá, Estelar!</h1>
+                  <h1 className="text-3xl font-black">Olá, {studentName}!</h1>
                   <p className="font-bold opacity-80">Você tem {lessons.length} novas missões hoje.</p>
                </div>
             </div>
@@ -132,8 +143,12 @@ export default function StudentDashboard() {
                    </div>
 
                    <div>
-                      <h3 className="text-xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">{lesson.topic.name}</h3>
-                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">{lesson.topic.subject.name}</p>
+                      <h3 className="text-xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">
+                        {lesson.topic?.name || 'Assunto sem nome'}
+                      </h3>
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">
+                        {lesson.topic?.subject?.name || 'Matéria'}
+                      </p>
                    </div>
 
                    <div className="flex items-center gap-4 text-slate-400 font-bold text-xs">
@@ -157,6 +172,10 @@ export default function StudentDashboard() {
           )}
         </div>
       </div>
+        </div>
+      </main>
+
+      <MobileNav role="STUDENT" />
     </div>
   );
 }

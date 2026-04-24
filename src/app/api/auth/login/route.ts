@@ -5,17 +5,17 @@ import crypto from 'crypto';
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
+    const { email, password } = await request.json();
 
     const user = await prisma.user.findUnique({
-      where: { username },
+      where: { email },
       include: {
         wallet: true,
       }
     });
 
     if (!user) {
-      return NextResponse.json({ success: false, error: 'Usuário não encontrado' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'E-mail não encontrado' }, { status: 404 });
     }
 
     const passwordHash = crypto.createHash('sha256').update(password).digest('hex');

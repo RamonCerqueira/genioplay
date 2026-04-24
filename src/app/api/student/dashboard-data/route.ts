@@ -30,6 +30,7 @@ export async function GET() {
 
     return NextResponse.json({
       lessons,
+      username: session.user.username,
       balance: wallet?.balance || 0
     });
   } catch (error: any) {

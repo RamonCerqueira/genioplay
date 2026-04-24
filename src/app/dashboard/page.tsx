@@ -19,8 +19,22 @@ export default function GuardianDashboard() {
 
   useEffect(() => {
     fetch('/api/guardian/dashboard-data')
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 401) {
+          window.location.href = '/auth/login';
+          return;
+        }
+        return res.json();
+      })
       .then(data => {
+        if (!data) return;
+        
+        // Se o usuário for um estudante, redireciona para a visão dele
+        if (data.role === 'STUDENT') {
+          window.location.href = '/dashboard/student';
+          return;
+        }
+
         setChildren(data.children || []);
         setAlerts(data.alerts || []);
         setStats(data.stats);
