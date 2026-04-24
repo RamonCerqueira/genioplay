@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Users, Brain, ShieldAlert, TrendingUp, PlusCircle, LayoutDashboard, ChevronRight, GraduationCap, Star, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Sidebar from '@/components/layout/Sidebar';
-import MobileNav from '@/components/layout/MobileNav';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function GuardianDashboard() {
   const [children, setChildren] = useState<any[]>([]);
@@ -43,11 +43,7 @@ export default function GuardianDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Sidebar role="GUARDIAN" subscriptionStatus={stats.subscriptionStatus} />
-      
-      <main className="md:ml-72 p-6 md:px-8 xl:px-16 pt-12 pb-32">
-        <div className="max-w-[1800px] mx-auto space-y-12">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           
           {/* Welcome & Quick Actions */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -202,9 +198,6 @@ export default function GuardianDashboard() {
             </div>
           </div>
         </div>
-      </main>
-
-      <MobileNav role="GUARDIAN" />
     </div>
   );
 }

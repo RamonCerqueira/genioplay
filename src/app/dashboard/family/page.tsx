@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Sidebar from '@/components/layout/Sidebar';
-import MobileNav from '@/components/layout/MobileNav';
 import { 
   Users, 
   Plus, 
@@ -16,6 +14,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 export default function FamilyPage() {
   const [children, setChildren] = useState<any[]>([]);
@@ -71,11 +70,7 @@ export default function FamilyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Sidebar role="GUARDIAN" />
-      
-      <main className="md:ml-72 p-6 md:p-12 pb-32">
-        <div className="max-w-[1600px] mx-auto space-y-12">
+    <div className="space-y-12">
           
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="space-y-2">
@@ -241,7 +236,6 @@ export default function FamilyPage() {
         )}
       </AnimatePresence>
 
-      <MobileNav role="GUARDIAN" />
     </div>
   );
 }

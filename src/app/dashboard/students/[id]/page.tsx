@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Sidebar from '@/components/layout/Sidebar';
-import MobileNav from '@/components/layout/MobileNav';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function StudentManagePage({ params }: { params: { id: string } }) {
   const [student, setStudent] = useState<any>(null);
@@ -74,11 +74,7 @@ export default function StudentManagePage({ params }: { params: { id: string } }
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Sidebar role="GUARDIAN" />
-      
-      <main className="md:ml-72 p-6 md:px-8 xl:px-16 pt-12 pb-32">
-        <div className="max-w-[1400px] mx-auto space-y-10">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
           
           {/* Header - Perfil do Filho */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -325,9 +321,6 @@ export default function StudentManagePage({ params }: { params: { id: string } }
             </div>
           )}
         </div>
-      </main>
-
-      <MobileNav role="GUARDIAN" />
     </div>
   );
 }

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Brain, Coins, Trophy, Zap, Clock, ChevronRight, Star, Flame, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Sidebar from '@/components/layout/Sidebar';
-import MobileNav from '@/components/layout/MobileNav';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function StudentDashboard() {
   const [lessons, setLessons] = useState<any[]>([]);
@@ -34,11 +34,7 @@ export default function StudentDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Sidebar role="STUDENT" />
-      
-      <main className="md:ml-72 p-6 md:px-8 xl:px-16 pt-12 pb-32">
-        <div className="max-w-6xl mx-auto space-y-10">
+    <div className="space-y-10">
       {/* Header Aluno - Vibe Gamer */}
       <div className="grid md:grid-cols-3 gap-6">
         <motion.div 
@@ -173,9 +169,6 @@ export default function StudentDashboard() {
         </div>
       </div>
         </div>
-      </main>
-
-      <MobileNav role="STUDENT" />
     </div>
   );
 }
