@@ -79,7 +79,9 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
     fetchSessionData();
     const s = io();
     setSocket(s);
-    return () => s.disconnect();
+    return () => {
+      s.disconnect();
+    };
   }, [sessionId]);
 
   const fetchSessionData = async () => {
