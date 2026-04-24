@@ -141,8 +141,6 @@ export default function FamilyPage() {
               ))
             )}
           </div>
-        </div>
-      </main>
 
       {/* Modal de Cadastro */}
       <AnimatePresence>
@@ -235,7 +233,6 @@ export default function FamilyPage() {
           </div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

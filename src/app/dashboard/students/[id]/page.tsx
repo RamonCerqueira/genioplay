@@ -8,8 +8,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 export default function StudentManagePage({ params }: { params: { id: string } }) {
   const [student, setStudent] = useState<any>(null);
@@ -320,7 +318,6 @@ export default function StudentManagePage({ params }: { params: { id: string } }
                </Link>
             </div>
           )}
-        </div>
     </div>
   );
 }

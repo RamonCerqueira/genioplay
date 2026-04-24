@@ -12,19 +12,6 @@ import {
   LogOut, 
   GraduationCap,
   ShieldCheck,
-  CreditCard
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
-  TrendingUp, 
-  Gift, 
-  LogOut, 
-  GraduationCap,
-  ShieldCheck,
   CreditCard,
   ChevronLeft,
   ChevronRight

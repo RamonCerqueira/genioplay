@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Brain, Coins, Trophy, Zap, Clock, ChevronRight, Star, Flame, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 export default function StudentDashboard() {
   const [lessons, setLessons] = useState<any[]>([]);
@@ -168,7 +166,6 @@ export default function StudentDashboard() {
           )}
         </div>
       </div>
-        </div>
     </div>
   );
 }

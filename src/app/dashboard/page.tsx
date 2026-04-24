@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Users, Brain, ShieldAlert, TrendingUp, PlusCircle, LayoutDashboard, ChevronRight, GraduationCap, Star, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 export default function GuardianDashboard() {
   const [children, setChildren] = useState<any[]>([]);
@@ -197,7 +195,6 @@ export default function GuardianDashboard() {
               </div>
             </div>
           </div>
-        </div>
     </div>
   );
 }
