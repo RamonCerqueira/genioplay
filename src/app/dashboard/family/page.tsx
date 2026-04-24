@@ -10,8 +10,9 @@ import {
   User, 
   Lock, 
   ChevronRight, 
-  Trash2,
-  GraduationCap
+  Mail,
+  Calendar,
+  Baby
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -20,7 +21,13 @@ export default function FamilyPage() {
   const [children, setChildren] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newChild, setNewChild] = useState({ username: '', password: '', avatar: '🎓' });
+  const [newChild, setNewChild] = useState({ 
+    username: '', 
+    email: '',
+    birthDate: '',
+    password: '', 
+    avatar: '🎓' 
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -57,7 +64,7 @@ export default function FamilyPage() {
       const data = await res.json();
       if (data.success) {
         setIsModalOpen(false);
-        setNewChild({ username: '', password: '', avatar: '🎓' });
+        setNewChild({ username: '', email: '', birthDate: '', password: '', avatar: '🎓' });
         fetchChildren();
       } else {
         setError(data.error || 'Erro ao cadastrar');
@@ -70,7 +77,7 @@ export default function FamilyPage() {
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 pb-20">
           
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="space-y-2">
@@ -87,7 +94,7 @@ export default function FamilyPage() {
               className="btn-primary py-4 px-8 shadow-xl shadow-blue-500/20 flex items-center gap-2 group"
             >
               <Plus size={20} className="group-hover:rotate-90 transition-transform" /> 
-              Cadastrar Novo Filho
+              Novo Filho
             </button>
           </div>
 
@@ -95,12 +102,12 @@ export default function FamilyPage() {
             {loading ? (
               [1, 2].map(i => <div key={i} className="h-44 bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] animate-pulse border border-slate-100 dark:border-slate-800" />)
             ) : children.length === 0 ? (
-              <div className="md:col-span-2 premium-card p-16 bg-white dark:bg-slate-900 border-dashed border-2 flex flex-col items-center text-center space-y-8">
+              <div className="md:col-span-2 premium-card p-16 bg-white dark:bg-slate-900 border-dashed border-2 border-slate-200 dark:border-slate-800 flex flex-col items-center text-center space-y-8">
                 <div className="w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 shadow-inner">
-                   <GraduationCap size={48} />
+                   <Baby size={48} />
                 </div>
                 <div className="space-y-3">
-                   <h3 className="text-2xl font-black text-slate-800 dark:text-white">Ainda não há alunos cadastrados</h3>
+                   <h3 className="text-2xl font-black text-slate-800 dark:text-white">Ainda não há filhos cadastrados</h3>
                    <p className="text-slate-500 dark:text-slate-400 font-bold max-w-md mx-auto">
                      Adicione seus filhos para começar a acompanhar o progresso e transformar a educação deles em uma jornada épica.
                    </p>
@@ -109,7 +116,7 @@ export default function FamilyPage() {
                   onClick={() => setIsModalOpen(true)}
                   className="btn-primary px-10 py-4 shadow-xl shadow-blue-500/20"
                 >
-                  Cadastrar Agora
+                  Cadastrar Filho
                 </button>
               </div>
             ) : (
@@ -142,7 +149,7 @@ export default function FamilyPage() {
             )}
           </div>
 
-      {/* Modal de Cadastro */}
+      {/* Modal de Cadastro - Compacto e Premium */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -158,46 +165,46 @@ export default function FamilyPage() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-3xl relative z-[101] overflow-hidden"
+              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-3xl relative z-[101] overflow-hidden"
             >
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-600 to-indigo-600" />
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
               
-              <div className="flex justify-between items-center mb-10">
-                <h2 className="text-3xl font-black text-slate-800 dark:text-white">Novo Aluno</h2>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                   <h2 className="text-2xl font-black text-slate-800 dark:text-white">Novo Filho</h2>
+                   <p className="text-xs font-bold text-slate-500">Crie a conta de acesso para seu pequeno gênio.</p>
+                </div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                   <X size={24} className="text-slate-400" />
                 </button>
               </div>
 
-              <form onSubmit={handleAddChild} className="space-y-8">
+              <form onSubmit={handleAddChild} className="space-y-6">
                 {error && <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold text-center border border-red-100">{error}</div>}
 
-                {/* Avatar Selection */}
-                <div className="space-y-4 text-center">
-                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Escolha um Avatar</label>
-                   <div className="flex flex-wrap justify-center gap-3">
-                      {avatars.map(a => (
-                        <button 
-                          key={a}
-                          type="button"
-                          onClick={() => setNewChild({...newChild, avatar: a})}
-                          className={`w-12 h-12 text-2xl flex items-center justify-center rounded-2xl transition-all ${newChild.avatar === a ? 'bg-blue-600 scale-125 shadow-lg shadow-blue-500/30' : 'bg-slate-50 dark:bg-slate-800 hover:bg-blue-50'}`}
-                        >
-                          {a}
-                        </button>
-                      ))}
-                   </div>
+                {/* Avatar Selection - Mais compacto */}
+                <div className="flex flex-wrap justify-center gap-2">
+                  {avatars.map(a => (
+                    <button 
+                      key={a}
+                      type="button"
+                      onClick={() => setNewChild({...newChild, avatar: a})}
+                      className={`w-10 h-10 text-xl flex items-center justify-center rounded-xl transition-all ${newChild.avatar === a ? 'bg-blue-600 scale-110 shadow-lg shadow-blue-500/30' : 'bg-slate-50 dark:bg-slate-800 hover:bg-blue-50'}`}
+                    >
+                      {a}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Nome do Aluno (Login)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome do Filho</label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                       <input 
                         type="text" 
-                        className="input-field pl-12" 
-                        placeholder="Ex: joao_genio" 
+                        className="input-field pl-12 h-12 text-sm" 
+                        placeholder="Ex: João Silva" 
                         value={newChild.username}
                         onChange={e => setNewChild({...newChild, username: e.target.value})}
                         required 
@@ -205,18 +212,49 @@ export default function FamilyPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail de Acesso</label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                       <input 
-                        type="password" 
-                        className="input-field pl-12" 
-                        placeholder="Crie uma senha para seu filho" 
-                        value={newChild.password}
-                        onChange={e => setNewChild({...newChild, password: e.target.value})}
+                        type="email" 
+                        className="input-field pl-12 h-12 text-sm" 
+                        placeholder="filho@email.com" 
+                        value={newChild.email}
+                        onChange={e => setNewChild({...newChild, email: e.target.value})}
                         required 
                       />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nascimento</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input 
+                          type="date" 
+                          className="input-field pl-12 h-12 text-sm" 
+                          value={newChild.birthDate}
+                          onChange={e => setNewChild({...newChild, birthDate: e.target.value})}
+                          required 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Senha</label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input 
+                          type="password" 
+                          className="input-field pl-12 h-12 text-sm" 
+                          placeholder="••••••" 
+                          value={newChild.password}
+                          onChange={e => setNewChild({...newChild, password: e.target.value})}
+                          required 
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -224,9 +262,9 @@ export default function FamilyPage() {
                 <button 
                   type="submit" 
                   disabled={submitting}
-                  className="btn-primary w-full py-5 text-lg shadow-2xl shadow-blue-500/30"
+                  className="btn-primary w-full py-4 font-black shadow-xl shadow-blue-500/20"
                 >
-                  {submitting ? <Loader2 className="animate-spin" size={24} /> : 'Concluir Cadastro'}
+                  {submitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Cadastrar Filho'}
                 </button>
               </form>
             </motion.div>

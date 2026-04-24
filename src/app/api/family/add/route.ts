@@ -11,16 +11,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { username, password, avatar } = await request.json();
+    const { username, email, birthDate, password, avatar } = await request.json();
 
-    if (!username || !password) {
+    if (!username || !email || !password) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
 
-    // Verificar se o username já existe
-    const existing = await prisma.user.findUnique({ where: { username } });
-    if (existing) {
+    // Verificar se o username ou email já existem
+    const existingUsername = await prisma.user.findUnique({ where: { username } });
+    if (existingUsername) {
       return NextResponse.json({ error: 'Este nome de usuário já existe' }, { status: 400 });
+    }
+
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) {
+      return NextResponse.json({ error: 'Este e-mail já está sendo usado' }, { status: 400 });
     }
 
     const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
@@ -30,6 +35,8 @@ export async function POST(request: Request) {
       const student = await tx.user.create({
         data: {
           username,
+          email,
+          birthDate: birthDate ? new Date(birthDate) : null,
           passwordHash,
           role: 'STUDENT',
           avatar: avatar || '🎓',

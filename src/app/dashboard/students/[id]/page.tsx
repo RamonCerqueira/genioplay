@@ -121,6 +121,7 @@ export default function StudentManagePage({ params }: { params: { id: string } }
                {[
                  { id: 'overview', label: 'Visão Geral', icon: Zap },
                  { id: 'metrics', label: 'Desempenho', icon: BarChart3 },
+                 { id: 'interactions', label: 'Interações IA', icon: MessageSquare },
                  { id: 'settings', label: 'Cadastro', icon: Settings }
                ].map(tab => (
                  <button
@@ -313,7 +314,53 @@ export default function StudentManagePage({ params }: { params: { id: string } }
               </div>
             )}
 
-            {activeTab === 'metrics' && (
+            {activeTab === 'interactions' && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                 <div className="premium-card p-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl">
+                    <div className="flex justify-between items-center mb-8">
+                       <div>
+                          <h2 className="text-2xl font-black text-slate-800 dark:text-white">Conversas com Tutor Gênio</h2>
+                          <p className="text-sm font-bold text-slate-500">Acompanhe as dúvidas e o interesse do seu filho.</p>
+                       </div>
+                       <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-600 text-xs font-black uppercase tracking-widest">
+                          Beta - Auditoria IA
+                       </div>
+                    </div>
+
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-hide">
+                       {[
+                         { role: 'user', content: 'Como funciona a fotossíntese?', time: 'Hoje às 14:20' },
+                         { role: 'assistant', content: 'Ótima pergunta! Imagine que as plantas têm pequenas fábricas nas folhas que usam a luz do sol para fazer comida... 🌱☀️', time: 'Hoje às 14:21' },
+                         { role: 'user', content: 'E elas dormem à noite?', time: 'Hoje às 14:25' },
+                         { role: 'assistant', content: 'Quase isso! À noite elas param de fazer comida e começam a respirar de um jeito diferente, igual a nós. 😴🌙', time: 'Hoje às 14:26' },
+                       ].map((chat, i) => (
+                         <div key={i} className={`flex flex-col ${chat.role === 'user' ? 'items-end' : 'items-start'}`}>
+                            <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-bold shadow-sm ${
+                              chat.role === 'user' 
+                              ? 'bg-blue-600 text-white rounded-tr-none' 
+                              : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-100'
+                            }`}>
+                               {chat.content}
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 mt-1 px-2">{chat.time}</span>
+                         </div>
+                       ))}
+                    </div>
+
+                    <div className="mt-10 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-[2rem] border border-indigo-100 dark:border-indigo-900/30 flex items-center gap-6">
+                       <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
+                          <Brain size={32} />
+                       </div>
+                       <div>
+                          <h4 className="text-lg font-black text-slate-800 dark:text-white">Insight do Gênio</h4>
+                          <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
+                             {student.username} demonstrou muito interesse em **Ciências da Natureza** hoje. Que tal incentivar com uma leitura extra sobre plantas?
+                          </p>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            )}
               <div className="premium-card p-20 text-center space-y-6 bg-white dark:bg-slate-900">
                  <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto text-indigo-600">
                     <BarChart3 size={40} />

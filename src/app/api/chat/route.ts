@@ -13,13 +13,14 @@ export async function POST(req: Request) {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
+      console.error('ERRO: GEMINI_API_KEY não configurada no .env');
       return NextResponse.json({ 
         role: 'assistant', 
-        content: 'Olá! Estou em modo de manutenção (API Key ausente), mas em breve poderei tirar todas as suas dúvidas!' 
+        content: 'Olá! Meu cérebro está um pouco desligado agora porque não encontrei minha chave de acesso (API Key). Peça para o seu pai verificar as configurações do servidor! 🛠️🧠' 
       });
     }
 
-    // Busca contexto do aluno (persona, nível, etc)
+    // Busca contexto do aluno
     const student = await prisma.user.findUnique({
       where: { id: session.user.id },
     });
@@ -29,10 +30,10 @@ export async function POST(req: Request) {
       Sua persona é encorajadora, divertida e usa muitos emojis.
       O aluno se chama ${student?.username}.
       
-      MISSÃO:
-      - Ajude o aluno a entender conceitos acadêmicos.
-      - Se ele perguntar algo não educativo, tente sutilmente levar a conversa de volta para o aprendizado ou curiosidades científicas.
-      - NUNCA dê a resposta de uma prova diretamente, mas explique COMO chegar lá.
+      REGRAS:
+      - Ajude o aluno a entender conceitos acadêmicos de forma simples.
+      - Se ele perguntar algo não educativo, tente sutilmente levar a conversa de volta para o aprendizado.
+      - NUNCA dê a resposta de uma prova diretamente, explique o conceito.
       
       Pergunta do Aluno: "${message}"
     `;
@@ -42,19 +43,36 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7 }
+        generationConfig: { 
+          temperature: 0.7,
+          maxOutputTokens: 800 
+        }
       })
     });
 
     const result = await response.json();
-    const reply = result.candidates[0].content.parts[0].text;
 
-    // Salva no histórico para o pai ver depois (Opcional: Criar tabela ChatHistory)
-    // await prisma.activityLog.create({ ... })
+    if (result.error) {
+      console.error('ERRO GEMINI API:', result.error);
+      return NextResponse.json({ 
+        role: 'assistant', 
+        content: `Ops! O Google me disse algo estranho: "${result.error.message}". Vamos tentar de novo? 🧐` 
+      });
+    }
+
+    if (!result.candidates || result.candidates.length === 0) {
+      return NextResponse.json({ 
+        role: 'assistant', 
+        content: 'Humm, pensei tanto que me perdi! Pode repetir a pergunta? 😅' 
+      });
+    }
+
+    const reply = result.candidates[0].content.parts[0].text;
 
     return NextResponse.json({ role: 'assistant', content: reply });
 
-  } catch (error) {
-    return NextResponse.json({ error: 'Erro no servidor' }, { status: 500 });
+  } catch (error: any) {
+    console.error('ERRO CRÍTICO NO CHAT:', error);
+    return NextResponse.json({ error: 'Erro interno no servidor de IA' }, { status: 500 });
   }
 }
