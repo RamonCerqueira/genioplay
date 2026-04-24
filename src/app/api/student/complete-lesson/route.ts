@@ -21,7 +21,16 @@ export async function POST(request: Request) {
       }))
     });
 
-    // 2. Calcula recompensa (ex: 150 moedas por lição completa)
+    // 2. Marca a lição como concluída
+    await prisma.generatedLesson.update({
+      where: { id: lessonId },
+      data: {
+        completed: true,
+        completedAt: new Date()
+      }
+    });
+
+    // 3. Calcula recompensa (ex: 150 moedas por lição completa)
     const rewardAmount = 150;
 
     await prisma.wallet.upsert({

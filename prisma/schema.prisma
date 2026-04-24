@@ -121,13 +121,15 @@ model Flashcard {
 }
 
 model GeneratedLesson {
-  id         String   @id @default(cuid())
-  studentId  String
-  student    User     @relation(fields: [studentId], references: [id])
-  topicId    String
-  topic      Topic    @relation(fields: [topicId], references: [id])
-  guardianId String
-  createdAt  DateTime @default(now())
+  id          String    @id @default(cuid())
+  studentId   String
+  student     User      @relation(fields: [studentId], references: [id])
+  topicId     String
+  topic       Topic     @relation(fields: [topicId], references: [id])
+  guardianId  String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
 }
 
 model Question {
