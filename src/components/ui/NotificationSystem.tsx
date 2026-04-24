@@ -17,7 +17,7 @@ const NotificationSchema = z.object({
 type Notification = z.infer<typeof NotificationSchema>;
 
 interface NotificationContextType {
-  notify: (data: Omit<Notification, 'id'>) => void;
+  notify: (data: Omit<Notification, 'id' | 'duration'> & { duration?: number }) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -25,7 +25,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const notify = useCallback((data: Omit<Notification, 'id'>) => {
+  const notify = useCallback((data: Omit<Notification, 'id' | 'duration'> & { duration?: number }) => {
     const id = Math.random().toString(36).substring(7);
     const newNotification = NotificationSchema.parse({ ...data, id });
     setNotifications((prev) => [...prev, newNotification]);

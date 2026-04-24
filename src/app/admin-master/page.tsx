@@ -31,7 +31,8 @@ export default function AdmMasterDashboard() {
      notify({
        title: isBlocked ? 'Acesso Liberado' : 'Usuário Bloqueado',
        message: `O status do usuário foi atualizado no banco de dados com sucesso.`,
-       type: isBlocked ? 'SUCCESS' : 'WARNING'
+       type: isBlocked ? 'SUCCESS' : 'WARNING',
+       duration: 4000
      });
   };
 
