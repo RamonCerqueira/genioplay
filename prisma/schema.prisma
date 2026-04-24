@@ -1,0 +1,244 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  GUARDIAN
+  STUDENT
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  FREE
+  PREMIUM
+  PAST_DUE
+  CANCELED
+}
+
+enum SessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String?   @unique
+  username     String    @unique
+  passwordHash String
+  role         UserRole  @default(STUDENT)
+  avatar       String?
+  birthDate    DateTime?
+  cpf          String?   @unique
+  phone        String?
+  cep          String?
+  address      String?
+  city         String?
+  state        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relações de Família
+  guardianOf FamilyMember[] @relation("GuardianRelation")
+  studentIn  FamilyMember[] @relation("StudentRelation")
+
+  // Assinatura (Apenas para Guardians)
+  subscription Subscription?
+
+  // Gamificação (Apenas para Students)
+  wallet      Wallet?
+  sessions    StudySession[]
+  skillLevels SkillLevel[]
+  answers     Answer[]
+
+  // Growth
+  referralCode String     @unique @default(uuid())
+  referrals    Referral[] @relation("Referrer")
+  referredBy   Referral?  @relation("Referred")
+
+  // Recuperação de Senha
+  resetToken        String?   @unique
+  resetTokenExpires DateTime?
+
+  generatedLessons GeneratedLesson[]
+}
+
+model FamilyMember {
+  id         String @id @default(cuid())
+  guardianId String
+  studentId  String
+  guardian   User   @relation("GuardianRelation", fields: [guardianId], references: [id])
+  student    User   @relation("StudentRelation", fields: [studentId], references: [id])
+
+  @@unique([guardianId, studentId])
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  user             User               @relation(fields: [userId], references: [id])
+  planId           String // ex: "premium_monthly"
+  status           SubscriptionStatus @default(FREE)
+  currentPeriodEnd DateTime?
+  stripeId         String?            @unique
+}
+
+model Subject {
+  id     String  @id @default(cuid())
+  name   String  @unique // ex: "Matemática", "Português"
+  icon   String?
+  topics Topic[]
+}
+
+model Topic {
+  id          String            @id @default(cuid())
+  subjectId   String
+  subject     Subject           @relation(fields: [subjectId], references: [id])
+  name        String
+  description String?
+  difficulty  Int               @default(1) // 1 a 10
+  questions   Question[]
+  flashcards  Flashcard[]
+  lessons     GeneratedLesson[]
+}
+
+model Flashcard {
+  id      String @id @default(cuid())
+  topicId String
+  topic   Topic  @relation(fields: [topicId], references: [id])
+  front   String
+  back    String
+}
+
+model GeneratedLesson {
+  id         String   @id @default(cuid())
+  studentId  String
+  student    User     @relation(fields: [studentId], references: [id])
+  topicId    String
+  topic      Topic    @relation(fields: [topicId], references: [id])
+  guardianId String
+  createdAt  DateTime @default(now())
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  topicId     String
+  topic       Topic    @relation(fields: [topicId], references: [id])
+  text        String
+  explanation String?
+  difficulty  Int      @default(1)
+  options     Option[]
+  answers     Answer[]
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  text       String
+  isCorrect  Boolean  @default(false)
+}
+
+model Answer {
+  id           String   @id @default(cuid())
+  studentId    String
+  student      User     @relation(fields: [studentId], references: [id])
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id])
+  optionId     String
+  isCorrect    Boolean
+  responseTime Int      @default(0) // em ms
+  createdAt    DateTime @default(now())
+}
+
+model SkillLevel {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id])
+  subjectId   String
+  subjectName String // Denormalized for easier querying
+  elo         Int      @default(1000) // Sistema de Elo para IA Adaptativa
+  updatedAt   DateTime @updatedAt
+
+  @@unique([studentId, subjectId])
+}
+
+model StudySession {
+  id        String        @id @default(cuid())
+  studentId String
+  student   User          @relation(fields: [studentId], references: [id])
+  startTime DateTime      @default(now())
+  endTime   DateTime?
+  status    SessionStatus @default(IN_PROGRESS)
+
+  // Pomodoro Stats
+  pomodorosDone Int @default(0)
+  focusTime     Int @default(0) // em segundos ativos
+  breakTime     Int @default(0) // em segundos de pausa
+
+  focusEvents FocusEvent[]
+}
+
+model FocusEvent {
+  id        String       @id @default(cuid())
+  sessionId String
+  session   StudySession @relation(fields: [sessionId], references: [id])
+  type      String // "TAB_BLUR", "WINDOW_HIDDEN", "IDLE"
+  timestamp DateTime     @default(now())
+  metadata  Json? // Detalhes extras se necessário
+}
+
+model Wallet {
+  id        String        @id @default(cuid())
+  studentId String        @unique
+  student   User          @relation(fields: [studentId], references: [id])
+  balance   Int           @default(0)
+  updatedAt DateTime      @updatedAt
+  history   Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  walletId  String
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  amount    Int // Positivo para ganho, Negativo para gasto
+  type      String // "STUDY_REWARD", "POMODORO_BONUS", "REWARD_REDEEM"
+  createdAt DateTime @default(now())
+}
+
+model Reward {
+  id          String       @id @default(cuid())
+  guardianId  String
+  title       String
+  description String?
+  cost        Int
+  isActive    Boolean      @default(true)
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id        String   @id @default(cuid())
+  rewardId  String
+  reward    Reward   @relation(fields: [rewardId], references: [id])
+  studentId String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+}
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String
+  referrer   User     @relation("Referrer", fields: [referrerId], references: [id])
+  referredId String   @unique
+  referred   User     @relation("Referred", fields: [referredId], references: [id])
+  createdAt  DateTime @default(now())
+  rewarded   Boolean  @default(false)
+}

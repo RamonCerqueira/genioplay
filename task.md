@@ -1,0 +1,9 @@
+- [x] Inicializar projeto Next.js (Manual via File Creation)
+- [x] Configurar Docker Compose (Postgres, Redis)
+- [x] Configurar Prisma e gerar o Schema
+- [x] Implementar Design System Base (CSS Variables, Google Fonts)
+- [x] Criar estrutura de pastas (components, lib, hooks, services)
+- [ ] Configurar Socket.io com Redis Adapter (Draft)
+- [x] Criar Landing Page de conversão (Growth-focused)
+- [ ] Implementar Dashboard Base (Guardian & Student)
+- [ ] Executar `npm install` e `npx prisma generate` (Aguardando Usuário)
