@@ -79,12 +79,18 @@ export const generateStudyContent = async (data: {
     });
 
     const result = await response.json();
+    
+    if (result.error) {
+      console.error("Erro retornado pelo Gemini:", result.error);
+      return getMockData(data.topic);
+    }
+
     const contentText = result.candidates[0].content.parts[0].text;
     const content = JSON.parse(contentText);
     return content as AIStudyPackage;
 
   } catch (error) {
-    console.error("Erro na chamada do Gemini:", error);
+    console.error("Erro crítico na chamada do Gemini:", error);
     return getMockData(data.topic);
   }
 };
@@ -92,8 +98,8 @@ export const generateStudyContent = async (data: {
 function getMockData(topic: string): AIStudyPackage {
   return {
     cards: [
-      { title: `Introdução a ${topic}`, content: "Este é um conteúdo de exemplo gerado pelo sistema porque a API da OpenAI não está configurada ou falhou." },
-      { title: "Ponto importante", content: "Lembre-se de revisar os conceitos básicos antes de avançar para as questões médias." }
+      { title: `Introdução a ${topic}`, content: "Este é um conteúdo de exemplo gerado pelo sistema porque a API do Gemini não está configurada ou a chamada falhou." },
+      { title: "Ponto importante", content: "Certifique-se de que a GEMINI_API_KEY está correta nas variáveis de ambiente (.env)." }
     ],
     questions: [
       { text: `Qual o conceito principal de ${topic}?`, options: ["Opção A", "Opção B", "Opção C", "Opção D"], correctIndex: 0, difficulty: 'EASY', explanation: "A explicação detalhada apareceria aqui." },

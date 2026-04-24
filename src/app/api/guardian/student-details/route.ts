@@ -32,6 +32,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Estudante não encontrado' }, { status: 404 });
     }
 
+    // Calcula métricas reais
+    const answers = await prisma.answer.findMany({
+      where: { studentId: id }
+    });
+
+    const totalAnswers = answers.length;
+    const correctAnswers = answers.filter(a => a.isCorrect).length;
+    const averageScore = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+
     const lessons = await prisma.generatedLesson.findMany({
       where: { studentId: id },
       include: {
@@ -43,7 +52,19 @@ export async function GET(request: Request) {
       take: 10
     });
 
-    return NextResponse.json({ student, lessons });
+    const completedLessonsCount = lessons.filter(l => l.completed).length;
+
+    return NextResponse.json({ 
+      student, 
+      lessons,
+      metrics: {
+        averageScore,
+        totalAnswers,
+        completedLessons: completedLessonsCount,
+        streak: 3, // Mockado por enquanto, mas vindo da API
+        walletBalance: student.wallet?.balance || 0
+      }
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -4,14 +4,21 @@ import React, { useState, useEffect } from 'react';
 import { 
   Brain, Coins, Trophy, Zap, Clock, ChevronLeft, 
   Star, Flame, Target, BarChart3, PlusCircle, 
-  Settings, ShieldCheck 
+  Settings, ShieldCheck, X, Lock, User
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 export default function StudentManagePage({ params }: { params: { id: string } }) {
   const [student, setStudent] = useState<any>(null);
   const [lessons, setLessons] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any>({
+    averageScore: 0,
+    totalAnswers: 0,
+    completedLessons: 0,
+    streak: 0,
+    walletBalance: 0
+  });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'settings' | 'metrics'>('overview');
   const [isSaving, setIsSaving] = useState(false);
@@ -35,6 +42,7 @@ export default function StudentManagePage({ params }: { params: { id: string } }
           newPassword: ''
         });
         setLessons(data.lessons || []);
+        setMetrics(data.metrics || metrics);
         setLoading(false);
       });
   }, [params.id]);
@@ -71,6 +79,8 @@ export default function StudentManagePage({ params }: { params: { id: string } }
     </div>
   );
 
+  const [isParentalModalOpen, setIsParentalModalOpen] = useState(false);
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
           
@@ -96,8 +106,12 @@ export default function StudentManagePage({ params }: { params: { id: string } }
                <Link href={`/dashboard/generator?studentId=${student.id}`} className="btn-primary flex-1 md:flex-none py-3 px-6 flex items-center justify-center gap-2">
                   <PlusCircle size={20} /> Atribuir Lição
                </Link>
-               <button className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-blue-600 transition-colors">
-                  <Settings size={24} />
+               <button 
+                onClick={() => setIsParentalModalOpen(true)}
+                className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
+                title="Controle Parental"
+               >
+                  <Settings size={24} className="animate-spin-slow" />
                </button>
             </div>
           </div>
@@ -133,21 +147,21 @@ export default function StudentManagePage({ params }: { params: { id: string } }
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Saldo GênioCoins</p>
                     <div className="flex items-center gap-2">
                       <Coins className="text-orange-500" size={24} />
-                      <span className="text-3xl font-black text-slate-800 dark:text-white">{student.wallet?.balance || 0}</span>
+                      <span className="text-3xl font-black text-slate-800 dark:text-white">{metrics.walletBalance}</span>
                     </div>
                 </div>
                 <div className="premium-card p-6 bg-white dark:bg-slate-900">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ofensiva Atual</p>
                     <div className="flex items-center gap-2">
                       <Flame className="text-rose-500" size={24} />
-                      <span className="text-3xl font-black text-slate-800 dark:text-white">3 Dias</span>
+                      <span className="text-3xl font-black text-slate-800 dark:text-white">{metrics.streak} Dias</span>
                     </div>
                 </div>
                 <div className="premium-card p-6 bg-white dark:bg-slate-900">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Média de Acertos</p>
                     <div className="flex items-center gap-2">
                       <Target className="text-emerald-500" size={24} />
-                      <span className="text-3xl font-black text-slate-800 dark:text-white">82%</span>
+                      <span className="text-3xl font-black text-slate-800 dark:text-white">{metrics.averageScore}%</span>
                     </div>
                 </div>
                 <div className="premium-card p-6 bg-white dark:bg-slate-900">
@@ -318,6 +332,102 @@ export default function StudentManagePage({ params }: { params: { id: string } }
                </Link>
             </div>
           )}
+        </div>
+
+      {/* Parental Control Modal */}
+      <AnimatePresence>
+        {isParentalModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsParentalModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-3xl relative z-[101] overflow-hidden"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                   <h2 className="text-2xl font-black text-slate-800 dark:text-white">Controle Parental</h2>
+                   <p className="text-sm font-bold text-slate-500">Ações rápidas para {student.username}</p>
+                </div>
+                <button onClick={() => setIsParentalModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                  <X size={24} className="text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                 <button 
+                  onClick={() => {
+                    alert('Moedas enviadas com sucesso!');
+                    setIsParentalModalOpen(false);
+                  }}
+                  className="w-full p-4 rounded-2xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 flex items-center gap-4 hover:scale-[1.02] transition-transform text-left"
+                 >
+                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-orange-500 shadow-sm">
+                       <Coins size={24} />
+                    </div>
+                    <div>
+                       <p className="font-black text-slate-800 dark:text-white">Dar 50 Moedas</p>
+                       <p className="text-xs font-bold text-slate-500">Recompensa por bom comportamento</p>
+                    </div>
+                 </button>
+
+                 <button 
+                  onClick={() => {
+                    setActiveTab('settings');
+                    setIsParentalModalOpen(false);
+                  }}
+                  className="w-full p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 flex items-center gap-4 hover:scale-[1.02] transition-transform text-left"
+                 >
+                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-blue-600 shadow-sm">
+                       <Lock size={24} />
+                    </div>
+                    <div>
+                       <p className="font-black text-slate-800 dark:text-white">Resetar Senha</p>
+                       <p className="text-xs font-bold text-slate-500">Mudar as credenciais de acesso</p>
+                    </div>
+                 </button>
+
+                 <button 
+                  onClick={() => {
+                    setActiveTab('settings');
+                    setIsParentalModalOpen(false);
+                  }}
+                  className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 flex items-center gap-4 hover:scale-[1.02] transition-transform text-left"
+                 >
+                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-600 shadow-sm">
+                       <User size={24} />
+                    </div>
+                    <div>
+                       <p className="font-black text-slate-800 dark:text-white">Editar Perfil</p>
+                       <p className="text-xs font-bold text-slate-500">Mudar avatar, nome ou e-mail</p>
+                    </div>
+                 </button>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                 <button 
+                  className="w-full py-4 text-xs font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-2xl transition-colors"
+                  onClick={() => {
+                    if(confirm(`Tem certeza que deseja desvincular ${student.username}? Esta ação não pode ser desfeita.`)) {
+                      alert('Estudante desvinculado.');
+                    }
+                  }}
+                 >
+                   Desvincular Estudante
+                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
