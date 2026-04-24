@@ -69,6 +69,8 @@ model User {
   resetTokenExpires DateTime?
 
   generatedLessons GeneratedLesson[]
+  rewards          Reward[]          @relation("GuardianRewards")
+  redemptions      Redemption[]      @relation("StudentRedemptions")
 }
 
 model FamilyMember {
@@ -217,6 +219,7 @@ model Transaction {
 model Reward {
   id          String       @id @default(cuid())
   guardianId  String
+  guardian    User         @relation("GuardianRewards", fields: [guardianId], references: [id])
   title       String
   description String?
   cost        Int
@@ -229,6 +232,7 @@ model Redemption {
   rewardId  String
   reward    Reward   @relation(fields: [rewardId], references: [id])
   studentId String
+  student   User     @relation("StudentRedemptions", fields: [studentId], references: [id])
   status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt DateTime @default(now())
 }
