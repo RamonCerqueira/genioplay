@@ -45,7 +45,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             ))}
           </AnimatePresence>
         </div>
-      </div>
     </NotificationContext.Provider>
   );
 }
