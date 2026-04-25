@@ -36,14 +36,14 @@ export default function HelpPage() {
   const [openIndex, setOpenIndex] = useState<string | null>(null);
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white dark:bg-slate-950 min-h-screen transition-colors duration-500">
       <LandingNav />
       
       <main className="pt-40 pb-20 px-6">
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Header */}
           <div className="text-center space-y-6">
-            <h1 className="text-5xl font-black text-slate-800">Centro de <span className="text-gradient-blue">Ajuda.</span></h1>
+            <h1 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white leading-tight">Centro de <span className="text-gradient-blue">Ajuda.</span></h1>
             <div className="relative max-w-xl mx-auto">
               <input type="text" placeholder="Como podemos te ajudar hoje?" className="input-field pl-14" />
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -54,8 +54,8 @@ export default function HelpPage() {
           <div className="space-y-16">
             {faq.map((section, sIdx) => (
               <div key={sIdx} className="space-y-6">
-                <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                  <div className="bg-blue-100 text-blue-600 p-2 rounded-xl">
+                <h2 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                  <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-xl">
                     <section.icon size={20} />
                   </div>
                   {section.category}
@@ -67,12 +67,12 @@ export default function HelpPage() {
                     const isOpen = openIndex === id;
                     
                     return (
-                      <div key={id} className={`premium-card transition-all ${isOpen ? 'border-blue-200 bg-blue-50/20' : 'hover:border-slate-200'}`}>
+                      <div key={id} className={`premium-card transition-all ${isOpen ? 'border-blue-200 dark:border-blue-500/30 bg-blue-50/20 dark:bg-blue-900/10' : 'hover:border-slate-200 dark:hover:border-slate-700'}`}>
                         <button 
                           onClick={() => setOpenIndex(isOpen ? null : id)}
                           className="w-full p-6 flex items-center justify-between text-left"
                         >
-                          <span className="font-bold text-slate-700">{item.q}</span>
+                          <span className="font-bold text-slate-700 dark:text-slate-200">{item.q}</span>
                           <ChevronDown className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : ''}`} size={20} />
                         </button>
                         <AnimatePresence>
@@ -83,7 +83,7 @@ export default function HelpPage() {
                               exit={{ height: 0, opacity: 0 }}
                               className="overflow-hidden"
                             >
-                              <div className="px-6 pb-6 text-slate-500 font-medium leading-relaxed">
+                              <div className="px-6 pb-6 text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                                 {item.a}
                               </div>
                             </motion.div>
@@ -98,9 +98,9 @@ export default function HelpPage() {
           </div>
 
           {/* Contact Support CTA */}
-          <div className="premium-card p-12 bg-slate-50 border-dashed border-slate-200 text-center space-y-6">
-            <h3 className="text-2xl font-black text-slate-800">Ainda tem dúvidas?</h3>
-            <p className="text-slate-500 font-bold">Nossa equipe de suporte está pronta para te ajudar de segunda a sexta.</p>
+          <div className="premium-card p-12 bg-slate-50 dark:bg-slate-900 border-dashed border-slate-200 dark:border-slate-800 text-center space-y-6">
+            <h3 className="text-2xl font-black text-slate-800 dark:text-white">Ainda tem dúvidas?</h3>
+            <p className="text-slate-500 dark:text-slate-400 font-bold">Nossa equipe de suporte está pronta para te ajudar de segunda a sexta.</p>
             <button onClick={() => window.location.href = '/contact'} className="btn-primary mx-auto">
               Falar com o Suporte
             </button>

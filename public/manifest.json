@@ -2,20 +2,22 @@
   "name": "GênioPlay",
   "short_name": "GênioPlay",
   "description": "Transforme o tempo de tela do seu filho em conhecimento real com IA.",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "https://res.cloudinary.com/dbe9sl966/image/upload/v1713912000/genioplay_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "https://res.cloudinary.com/dbe9sl966/image/upload/v1713912000/genioplay_icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
