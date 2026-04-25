@@ -10,11 +10,13 @@ export default async function RewardsPage() {
     where: { id: session.user.id },
     include: {
       wallet: true,
-      guardianOf: {
+      studentIn: {
         include: {
           guardian: {
             include: {
-              rewards: true
+              rewards: {
+                where: { isActive: true }
+              }
             }
           }
         }
@@ -25,7 +27,7 @@ export default async function RewardsPage() {
   if (!student) return null;
 
   // Pegar recompensas cadastradas pelo responsável
-  const rewards = student.guardianOf.flatMap(g => g.guardian.rewards);
+  const rewards = student.studentIn.flatMap(s => s.guardian.rewards);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-1000 pb-20">

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Square, AlertCircle, ChevronRight, ChevronLeft, CheckCircle2, XCircle, Timer, Sparkles, Coins, Loader2, MessageCircle, Brain } from 'lucide-react';
+import { Play, Pause, Square, AlertCircle, ChevronRight, ChevronLeft, CheckCircle2, XCircle, Timer, Sparkles, Coins, Loader2, MessageCircle, Brain, Bot, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
@@ -415,16 +415,19 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
         </div>
       </div>
       {/* AI Tutor Chat Floating Button - Reposicionado para Mobile */}
-      <div className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-[60]">
+      <div className="fixed bottom-28 md:bottom-10 right-6 md:right-10 z-[60]">
         <button 
           onClick={() => setIsChatOpen(!isChatOpen)}
-          className="w-14 h-14 md:w-16 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group relative"
+          className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group relative"
         >
-          {isChatOpen ? <XCircle size={28} className="md:w-8 md:h-8" /> : <MessageCircle size={28} className="md:w-8 md:h-8" />}
+          {isChatOpen ? <ChevronDown size={30} /> : <Bot size={30} />}
           {!isChatOpen && (
-            <span className="absolute -top-12 right-0 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] md:text-xs font-black shadow-xl whitespace-nowrap animate-bounce border border-blue-100 dark:border-slate-700">
-              Dúvida? Fale comigo! 👋
-            </span>
+            <div className="absolute right-20 bg-slate-800 text-white text-[10px] font-black px-4 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest">
+               Dúvida sobre a lição? 🧠
+            </div>
+          )}
+          {!isChatOpen && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" />
           )}
         </button>
       </div>

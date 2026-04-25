@@ -16,6 +16,7 @@ export interface AIStudyPackage {
   cards: AICard[];
   questions: AIQuestion[];
   bonusQuestions: AIQuestion[];
+  metadata?: any; // Armazena a trilha completa, tabuleiro 3D e análise
 }
 
 import prisma from '@/lib/prisma';
@@ -25,138 +26,140 @@ export const generateStudyContent = async (data: {
   subject: string,
   topic: string,
   persona: string,
-  gradeLevel: string
+  gradeLevel: string,
+  visualMode?: 'linear' | 'tabuleiro',
+  previousAnswers?: any[],
+  gabarito?: any[]
 }): Promise<AIStudyPackage> => {
-  // 1. Tenta buscar a chave do Banco de Dados primeiro (Configuração do Admin)
-  // 2. Se não houver no banco, usa a variável de ambiente do .env
   let apiKey = process.env.GEMINI_API_KEY;
 
   try {
     const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
-    if (config?.geminiApiKey) {
-      apiKey = config.geminiApiKey;
-    }
-  } catch (error) {
-    console.error("Erro ao buscar geminiApiKey no banco, usando fallback .env");
-  }
+    if (config?.geminiApiKey) apiKey = config.geminiApiKey;
+  } catch (error) {}
 
+  const visualMode = data.visualMode || 'linear';
   const prompt = `
-    Aja como um PROFESSOR ESPECIALISTA em ensino infantil e fundamental com foco em aprendizado real e profundo.
-    
+    Aja como um sistema educacional avançado, adaptativo e gamificado com suporte a visualização 2D e 3D.
+    PERSONA: "${data.persona}".
+    TEMA: "${data.topic}"
+    IDADE: ${data.gradeLevel} (Alinhado à BNCC)
+    ALUNO: "${data.studentName}"
+    MODO_VISUAL: "${visualMode}"
+    RESPOSTAS_DO_ALUNO: ${JSON.stringify(data.previousAnswers || [])}
+    GABARITO: ${JSON.stringify(data.gabarito || [])}
+
     OBJETIVO:
-    Criar um material de estudo PROGRESSIVO e EFICAZ para o aluno "${data.studentName}", que está no ${data.gradeLevel}.
-    TEMA: "${data.topic}" (${data.subject}).
-    PERSONA DO PROFESSOR: "${data.persona}".
+    Gerar conteúdo de estudo, avaliação, análise de desempenho, feedback personalizado e trilha de aprendizado.
 
-    DIRETRIZES PEDAGÓGICAS (OBRIGATÓRIO):
-    1. CONSTRUÇÃO DO CONHECIMENTO: Explique de forma clara e progressiva (Simples → Intermediário → Aprofundado).
-    2. O "PORQUÊ" É A CHAVE: Não explique apenas "o que" é o assunto, mas "por que" ele funciona e como ele se aplica no mundo real.
-    3. EXEMPLOS PRÁTICOS: Use analogias e exemplos do dia a dia da criança na idade do ${data.gradeLevel}.
-    4. ANTICIPAÇÃO DE DÚVIDAS: Identifique e esclareça dentro da explicação as dúvidas mais comuns sobre este tema.
-    5. SEM INFANTILIZAÇÃO: Use linguagem adequada, mas não subestime a inteligência do aluno. Foque em aprendizado real.
-
-    TAREFA 1: GERAR UM RESUMO PEDAGÓGICO (summary)
-    - Uma síntese de 2 a 3 parágrafos que explique a essência do aprendizado de forma motivadora.
-
-    TAREFA 2: GERAR ENTRE 3 A 6 CARDS DE CONTEÚDO (cards)
-    - O número de cards deve depender da complexidade do tema.
-    - Card 1: Sempre comece com o Conceito básico e uma Analogia forte.
-    - Cards intermediários: Desenvolva a teoria com exemplos práticos e o "porquê" das coisas.
-    - Card Final: Conclua com aplicação no mundo real, curiosidade e um incentivo ao estudo.
-
-    TAREFA 3: GERAR 6 QUESTÕES (questions)
-    - Dificuldade Progressiva: 2 Fáceis (conceito), 2 Médias (entendimento), 2 Difíceis (aplicação).
-    - 4 alternativas cada, apenas 1 correta.
-    - Alternativas plausíveis (evite absurdas).
-    - FOCO: Testar compreensão real, não memorização.
-
-    TAREFA 4: GERAR 2 QUESTÕES BÔNUS (bonusQuestions)
-    - Desafios que exijam raciocínio e explicação do porquê.
-
-    VOCÊ DEVE RESPONDER APENAS COM UM OBJETO JSON VÁLIDO.
-    FORMATO EXATO:
+    --- ESTRUTURA JSON OBRIGATÓRIA ---
     {
-      "summary": "string síntese",
-      "cards": [
-        { "title": "string impactante", "content": "explicação densa e didática" }
-      ],
-      "questions": [
-        { 
-          "text": "pergunta contextualizada", 
-          "options": ["string","string","string","string"], 
-          "correctIndex": 0, 
-          "difficulty": "EASY/MEDIUM/HARD", 
-          "explanation": "explicação do porquê esta é a correta" 
-        }
-      ],
-      "bonusQuestions": [
-        { 
-          "text": "pergunta desafio", 
-          "options": ["string","string","string"], 
-          "correctIndex": 0, 
-          "difficulty": "BONUS", 
-          "explanation": "explicação do raciocínio" 
-        }
-      ]
+      "conteudo": {
+        "titulo": "string",
+        "explicacao": "Explicação didática, clara e progressiva com exemplos reais e o porquê",
+        "resumo": "string curto e objetivo"
+      },
+      "avaliacao": {
+        "questoes": [
+          { "pergunta": "string", "alternativas": ["A","B","C","D"], "resposta_correta": 0, "dificuldade": "EASY/MEDIUM/HARD", "explicacao": "string" }
+        ],
+        "bonus": [
+          { "pergunta": "string", "resposta_correta_sugerida": "string", "explicacao": "raciocínio" }
+        ]
+      },
+      "analise": { "acertos": 0, "erros": 0, "nivel": "iniciante/intermediario/avancado" },
+      "feedback": { "geral": "string", "erros": [{ "questao": "string", "explicacao": "por que errou", "correcao": "ensino do conceito" }] },
+      "plano_estudo": [{ "topico": "string", "descricao": "string", "objetivo": "string" }],
+      "trilha": {
+        "modo": "${visualMode}",
+        "fases": [
+          {
+            "id": 1, "nome": "string", "descricao": "string", "dificuldade": 1, "status": "disponivel",
+            "posicao": { "x": 0, "y": 0, "z": 0 }, "conexoes": [2], "tipo_visual": "ilha/planeta/castelo", "cor": "#hex",
+            "teste": [{ "pergunta": "string", "alternativas": ["A","B","C","D"], "resposta_correta": 0 }]
+          }
+        ]
+      }
     }
 
-    REGRAS CRÍTICAS:
-    - Nunca retornar campos vazios.
-    - Linguagem da persona: "${data.persona}".
-    - Alinhamento total com a BNCC para o ${data.gradeLevel}.
+    REGRAS: Retornar APENAS o JSON. 6 questões na avaliação (3 fáceis, 2 médias, 1 difícil). 2 bônus.
   `;
 
-  if (!apiKey) {
-    console.warn("GEMINI_API_KEY não encontrada. Usando dados mockados.");
-    return getMockData(data.topic);
-  }
+  if (!apiKey) return getMockData(data.topic);
 
   const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
   let lastError = null;
 
   for (const modelName of models) {
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [{
-            role: "user",
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            responseMimeType: "application/json"
-          }
-        })
-      });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
 
-      const result = await response.json();
-      
-      if (result.error) {
-        console.warn(`Erro no modelo ${modelName}:`, result.error.message);
-        lastError = result.error;
-        continue; // Tenta o próximo modelo
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.6, responseMimeType: "application/json" }
+          })
+        });
+
+        clearTimeout(timeout);
+        const result = await response.json();
+        if (result.error) { lastError = result.error; continue; }
+
+        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Vazio");
+
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("JSON não encontrado");
+        const rawContent = JSON.parse(match[0]);
+
+        // Mapeamento para compatibilidade com o frontend atual
+        return {
+          summary: rawContent.conteudo.resumo,
+          cards: [
+            { title: rawContent.conteudo.titulo, content: rawContent.conteudo.explicacao }
+          ],
+          questions: rawContent.avaliacao.questoes.map((q: any) => ({
+            text: q.pergunta,
+            options: q.alternativas,
+            correctIndex: q.resposta_correta,
+            difficulty: q.dificuldade || 'MEDIUM',
+            explanation: q.explicacao
+          })),
+          bonusQuestions: rawContent.avaliacao.bonus.map((b: any) => ({
+            text: b.pergunta,
+            options: ["Entendi!", "Pode repetir?", "Interessante", "Díficil!"], // Fallback pois o bônus agora é aberto
+            correctIndex: 0,
+            difficulty: 'BONUS',
+            explanation: b.explicacao
+          })),
+          metadata: rawContent // Salva TUDO (trilha, tabuleiro, análise)
+        };
+
+      } catch (error: any) {
+        lastError = error;
       }
-
-      let contentText = result.candidates[0].content.parts[0].text;
-      contentText = contentText.replace(/```json/g, '').replace(/```/g, '').trim();
-      
-      const content = JSON.parse(contentText);
-      return content as AIStudyPackage;
-
-    } catch (error: any) {
-      console.error(`Erro crítico no modelo ${modelName}:`, error.message);
-      lastError = error;
     }
   }
 
-  // Se chegou aqui, todos os modelos falharam
-  console.error("Falha total na IA após tentar todos os modelos:", lastError);
   return getMockData(data.topic);
 };
+
+function getMockData(topic: string): AIStudyPackage {
+  return {
+    summary: `Conteúdo sobre ${topic}`,
+    cards: [{ title: `Estudando ${topic}`, content: "Conteúdo temporário..." }],
+    questions: [],
+    bonusQuestions: []
+  };
+}
+ptions.length !== 4) throw new Error(`Questão bônus ${i+1} deve ter 4 opções`);
+  });
+}
 
 function getMockData(topic: string): AIStudyPackage {
   return {

@@ -15,43 +15,34 @@ export async function GET(request: Request) {
     const studySession = await prisma.studySession.findUnique({
       where: { id: sessionId },
       include: {
-        student: {
+        topic: {
           include: {
-            generatedLessons: {
-              take: 1,
-              orderBy: { createdAt: 'desc' },
+            flashcards: true,
+            questions: {
               include: {
-                topic: {
-                  include: {
-                    flashcards: true,
-                    questions: {
-                      include: {
-                        options: true
-                      }
-                    },
-                    subject: true
-                  }
-                }
+                options: true
               }
-            }
+            },
+            subject: true
           }
-        }
+        },
+        student: true
       }
     });
 
     if (!studySession) return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 
-    const lesson = studySession.student.generatedLessons[0];
-    if (!lesson) return NextResponse.json({ error: 'No lessons found for this student' }, { status: 404 });
+    const topic = studySession.topic;
+    if (!topic) return NextResponse.json({ error: 'No topic linked to this session' }, { status: 404 });
 
     return NextResponse.json({
       success: true,
       studentId: studySession.studentId,
       studentName: studySession.student.username,
-      topic: lesson.topic.name,
-      subject: lesson.topic.subject.name,
-      flashcards: lesson.topic.flashcards.map(f => ({ id: f.id, title: f.front, content: f.back })),
-      questions: lesson.topic.questions.map(q => ({
+      topic: topic.name,
+      subject: topic.subject.name,
+      flashcards: topic.flashcards.map(f => ({ id: f.id, title: f.front, content: f.back })),
+      questions: topic.questions.map(q => ({
         id: q.id,
         question: q.text,
         explanation: q.explanation,

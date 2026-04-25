@@ -19,14 +19,33 @@ export async function GET() {
           select: {
             id: true,
             username: true,
+            email: true,
             avatar: true,
-            createdAt: true
+            gradeLevel: true,
+            birthDate: true,
+            createdAt: true,
+            wallet: {
+              select: { balance: true }
+            },
+            skillLevels: {
+              select: { subjectName: true, elo: true }
+            },
+            sessions: {
+              where: { status: 'COMPLETED' },
+              take: 5,
+              orderBy: { startTime: 'desc' },
+              select: { id: true, startTime: true, pomodorosDone: true }
+            }
           }
         }
       }
     });
 
-    const children = familyMembers.map(m => m.student);
+    const children = familyMembers.map(m => ({
+      ...m.student,
+      walletBalance: m.student.wallet?.balance || 0,
+      skills: m.student.skillLevels || []
+    }));
 
     return NextResponse.json({ success: true, children });
   } catch (error) {

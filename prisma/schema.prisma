@@ -114,6 +114,8 @@ model Topic {
   questions   Question[]
   flashcards  Flashcard[]
   lessons     GeneratedLesson[]
+  studySessions StudySession[]
+  metadata      Json?             // Para armazenar estruturas complexas como Tabuleiro 3D, trilhas, etc.
 }
 
 model Flashcard {
@@ -183,6 +185,8 @@ model StudySession {
   id        String        @id @default(cuid())
   studentId String
   student   User          @relation(fields: [studentId], references: [id])
+  topicId   String?
+  topic     Topic?        @relation(fields: [topicId], references: [id])
   startTime DateTime      @default(now())
   endTime   DateTime?
   status    SessionStatus @default(IN_PROGRESS)

@@ -58,10 +58,9 @@ export default function StudentDashboard() {
 
         <div className="grid lg:grid-cols-12 gap-10">
           
-          {/* Coluna da Esquerda: IA e Estatísticas */}
-          <div className="lg:col-span-4 space-y-10">
+          {/* Coluna da Esquerda: Estatísticas */}
+          <div className="lg:col-span-4">
             <StatsCards streak={stats.streak} walletBalance={stats.balance} />
-            <TutorChat />
           </div>
 
           {/* Coluna da Direita: Missões do Dia */}
@@ -70,9 +69,11 @@ export default function StudentDashboard() {
               <DailyMissions missions={lessons} />
             </div>
           </div>
-
         </div>
       </div>
+
+      {/* Tutor Gênio Flutuante */}
+      <TutorChat />
     </div>
   );
 }

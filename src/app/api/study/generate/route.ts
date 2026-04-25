@@ -6,13 +6,35 @@ import { getSubscriptionStatus } from '@/lib/subscription';
 
 export async function POST(request: Request) {
   const session = await getSession();
-  if (!session || session.user.role !== 'GUARDIAN') {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+
+  const isStudent = session.user.role === 'STUDENT';
+  const isGuardian = session.user.role === 'GUARDIAN';
+
+  if (!isStudent && !isGuardian) {
+    return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 
   try {
-    const { studentIds, subject, topic, gradeLevel, persona } = await request.json();
-    const plan = await getSubscriptionStatus(session.user.id);
+    let { studentIds, subject, topic, gradeLevel, persona } = await request.json();
+    
+    let guardianId = session.user.id;
+    let studentIdForAI = session.user.id;
+
+    if (isStudent) {
+      const family = await prisma.familyMember.findFirst({
+        where: { studentId: session.user.id }
+      });
+      if (!family) return NextResponse.json({ error: 'Vínculo familiar não encontrado' }, { status: 400 });
+      
+      guardianId = family.guardianId;
+      studentIds = [session.user.id];
+      
+      const student = await prisma.user.findUnique({ where: { id: session.user.id } });
+      gradeLevel = gradeLevel || student?.gradeLevel;
+    }
+
+    const plan = await getSubscriptionStatus(guardianId);
 
     // 1. Validar Limite de Estudantes
     if (studentIds.length > 1 && !plan.deepAI) {
@@ -26,7 +48,7 @@ export async function POST(request: Request) {
     startOfMonth.setDate(1);
     const lessonCount = await prisma.generatedLesson.count({
       where: {
-        guardianId: session.user.id,
+        guardianId: guardianId,
         createdAt: { gte: startOfMonth }
       }
     });
@@ -104,7 +126,7 @@ export async function POST(request: Request) {
           data: {
             studentId: sid,
             topicId: topicRecord.id,
-            guardianId: session.user.id
+            guardianId: guardianId
           }
         })
       ));
@@ -112,7 +134,12 @@ export async function POST(request: Request) {
       return lessons;
     }, { timeout: 30000 });
 
-    return NextResponse.json({ success: true, count: results.length, data: aiContent });
+    return NextResponse.json({ 
+      success: true, 
+      lessonId: results[0]?.id,
+      count: results.length, 
+      data: aiContent 
+    });
   } catch (error: any) {
     console.error('CRITICAL ERROR generating AI content:', error);
     return NextResponse.json({ 

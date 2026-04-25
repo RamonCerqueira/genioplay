@@ -1,20 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Plus, 
-  X, 
-  CheckCircle2, 
-  Loader2, 
-  User, 
-  Lock, 
-  ChevronRight, 
+import {
+  Users,
+  Plus,
+  X,
+  CheckCircle2,
+  Loader2,
+  User,
+  Lock,
+  ChevronRight,
   Mail,
   Calendar,
-  Baby,
   Pencil,
-  Trash2
+  Trash2,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  Baby
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,13 +27,13 @@ export default function FamilyPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const [newChild, setNewChild] = useState({ 
-    username: '', 
+  const [newChild, setNewChild] = useState({
+    username: '',
     email: '',
     birthDate: '',
-    password: '', 
+    password: '',
     gradeLevel: '',
-    avatar: '🎓' 
+    avatar: '🎓'
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -105,109 +108,164 @@ export default function FamilyPage() {
 
   return (
     <div className="space-y-12 pb-20">
-          
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-black text-slate-800 dark:text-white flex items-center gap-4">
-                <Users className="text-blue-600" size={40} /> Gestão da Família
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 font-bold text-lg italic">
-                "Educar é o ato de dar o exemplo."
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-slate-800 dark:text-white flex items-center gap-4">
+            <Users className="text-blue-600" size={40} /> Gestão da Família
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-bold text-lg italic">
+            "Educar é o ato de dar o exemplo."
+          </p>
+        </div>
+
+        <button
+          onClick={openAddModal}
+          className="btn-primary py-4 px-8 shadow-xl shadow-blue-500/20 flex items-center gap-2 group"
+        >
+          <Plus size={20} className="group-hover:rotate-90 transition-transform" />
+          Novo Filho
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {loading ? (
+          [1, 2].map(i => <div key={i} className="h-44 bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] animate-pulse border border-slate-100 dark:border-slate-800" />)
+        ) : children.length === 0 ? (
+          <div className="md:col-span-2 premium-card p-16 bg-white dark:bg-slate-900 border-dashed border-2 border-slate-200 dark:border-slate-800 flex flex-col items-center text-center space-y-8">
+            <div className="w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 shadow-inner">
+              <Baby size={48} />
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-slate-800 dark:text-white">Ainda não há filhos cadastrados</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-bold max-w-md mx-auto">
+                Adicione seus filhos para começar a acompanhar o progresso e transformar a educação deles em uma jornada épica.
               </p>
             </div>
-
-            <button 
+            <button
               onClick={openAddModal}
-              className="btn-primary py-4 px-8 shadow-xl shadow-blue-500/20 flex items-center gap-2 group"
+              className="btn-primary px-10 py-4 shadow-xl shadow-blue-500/20"
             >
-              <Plus size={20} className="group-hover:rotate-90 transition-transform" /> 
-              Novo Filho
+              Cadastrar Filho
             </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {loading ? (
-              [1, 2].map(i => <div key={i} className="h-44 bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] animate-pulse border border-slate-100 dark:border-slate-800" />)
-            ) : children.length === 0 ? (
-              <div className="md:col-span-2 premium-card p-16 bg-white dark:bg-slate-900 border-dashed border-2 border-slate-200 dark:border-slate-800 flex flex-col items-center text-center space-y-8">
-                <div className="w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 shadow-inner">
-                   <Baby size={48} />
+        ) : (
+          children.map(child => (
+            <motion.div
+              key={child.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="premium-card bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col group"
+            >
+              {/* Top Header - Info Básica */}
+              <div className="p-8 flex items-center justify-between border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-3xl bg-white dark:bg-slate-800 flex items-center justify-center text-4xl shadow-sm border border-slate-100 dark:border-slate-700">
+                    {child.avatar || '🎓'}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-800 dark:text-white">{child.username}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-black bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase">{child.gradeLevel}</span>
+                      <span className="text-[10px] font-bold text-slate-400">• Estudante GênioPlay</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                   <h3 className="text-2xl font-black text-slate-800 dark:text-white">Ainda não há filhos cadastrados</h3>
-                   <p className="text-slate-500 dark:text-slate-400 font-bold max-w-md mx-auto">
-                     Adicione seus filhos para começar a acompanhar o progresso e transformar a educação deles em uma jornada épica.
-                   </p>
-                </div>
-                <button 
-                  onClick={openAddModal}
-                  className="btn-primary px-10 py-4 shadow-xl shadow-blue-500/20"
+                <button
+                  onClick={() => openEditModal(child)}
+                  className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-blue-600 border border-slate-100 dark:border-slate-700 transition-all flex items-center justify-center shadow-sm"
+                  title="Editar Cadastro"
                 >
-                  Cadastrar Filho
+                  <Pencil size={16} />
                 </button>
               </div>
-            ) : (
-              children.map(child => (
-                <motion.div 
-                  key={child.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/20 dark:shadow-none flex items-center justify-between group hover:border-blue-200 transition-all relative overflow-hidden"
-                >
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-[2.5rem] bg-slate-50 dark:bg-blue-900/20 flex items-center justify-center text-5xl shadow-inner group-hover:scale-110 transition-transform">
-                      {child.avatar || '🎓'}
+
+              {/* Body - Stats e Matérias */}
+              <div className="p-8 space-y-8">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100/50 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                      <DollarSign size={20} />
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="text-2xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">{child.username}</h3>
-                      <div className="flex items-center gap-3">
-                         <div className="flex items-center gap-1.5 text-emerald-500">
-                            <CheckCircle2 size={12} />
-                            <span className="text-[9px] font-black uppercase tracking-widest">Ativo</span>
-                         </div>
-                         <span className="text-[9px] font-black bg-slate-100 dark:bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full uppercase">{child.gradeLevel}</span>
+                    <div>
+                      <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Moedas Gênio</p>
+                      <p className="text-xl font-black text-slate-800 dark:text-white">{child.walletBalance}</p>
+                    </div>
+                  </div>
+                  <div className="bg-indigo-50/50 dark:bg-indigo-900/10 p-4 rounded-2xl border border-indigo-100/50 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
+                      <TrendingUp size={20} />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">Nível XP</p>
+                      <p className="text-xl font-black text-slate-800 dark:text-white">Master</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Desempenho por Matéria</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {child.skills?.length > 0 ? child.skills.map((skill: any, i: number) => (
+                      <div key={i} className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700">
+                        <span className="text-[10px] font-black text-slate-700 dark:text-slate-300">{skill.subjectName}</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-[10px] font-black text-blue-600">{skill.elo}</span>
                       </div>
-                    </div>
+                    )) : (
+                      <p className="text-xs font-bold text-slate-400 italic">Nenhum progresso registrado ainda.</p>
+                    )}
                   </div>
-                  
-                  <div className="flex items-center gap-3">
-                     <button 
-                        onClick={() => openEditModal(child)}
-                        className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center"
-                        title="Editar Perfil"
-                     >
-                        <Pencil size={18} />
-                     </button>
+                </div>
+
+                {/* Atividades Recentes */}
+                <div className="space-y-4 pt-4 border-t border-slate-50 dark:border-slate-800">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Clock size={12} /> Missões Concluídas
+                  </h4>
+                  <div className="space-y-3">
+                    {child.sessions?.length > 0 ? child.sessions.map((session: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between text-xs font-bold">
+                        <span className="text-slate-600 dark:text-slate-400">{new Date(session.startTime).toLocaleDateString()} - Sessão de Foco</span>
+                        <span className="text-emerald-500">+{session.pomodorosDone * 10} Moedas</span>
+                      </div>
+                    )) : (
+                      <p className="text-xs font-bold text-slate-400 italic">Inicie uma trilha para ver o histórico aqui.</p>
+                    )}
                   </div>
-                </motion.div>
-              ))
-            )}
-          </div>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
 
       {/* Modal de Cadastro/Edição */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[3rem] p-8 shadow-3xl relative z-[101] overflow-hidden"
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
-              
+
               <div className="flex justify-between items-center mb-6">
                 <div>
-                   <h2 className="text-2xl font-black text-slate-800 dark:text-white">{isEditing ? 'Editar Perfil' : 'Novo Filho'}</h2>
-                   <p className="text-xs font-bold text-slate-500">{isEditing ? 'Atualize os dados do seu gênio.' : 'Crie a conta de acesso para seu pequeno gênio.'}</p>
+                  <h2 className="text-2xl font-black text-slate-800 dark:text-white">{isEditing ? 'Editar Perfil' : 'Novo Filho'}</h2>
+                  <p className="text-xs font-bold text-slate-500">{isEditing ? 'Atualize os dados do seu gênio.' : 'Crie a conta de acesso para seu pequeno gênio.'}</p>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                   <X size={24} className="text-slate-400" />
@@ -220,10 +278,10 @@ export default function FamilyPage() {
                 {/* Avatar Selection */}
                 <div className="flex flex-wrap justify-center gap-2">
                   {avatars.map(a => (
-                    <button 
+                    <button
                       key={a}
                       type="button"
-                      onClick={() => setNewChild({...newChild, avatar: a})}
+                      onClick={() => setNewChild({ ...newChild, avatar: a })}
                       className={`w-10 h-10 text-xl flex items-center justify-center rounded-xl transition-all ${newChild.avatar === a ? 'bg-blue-600 scale-110 shadow-lg shadow-blue-500/30' : 'bg-slate-50 dark:bg-slate-800 hover:bg-blue-50'}`}
                     >
                       {a}
@@ -236,13 +294,13 @@ export default function FamilyPage() {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome do Filho</label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input 
-                        type="text" 
-                        className="input-field pl-12 h-12 text-sm" 
-                        placeholder="Ex: João Silva" 
+                      <input
+                        type="text"
+                        className="input-field pl-12 h-12 text-sm"
+                        placeholder="Ex: João Silva"
                         value={newChild.username}
-                        onChange={e => setNewChild({...newChild, username: e.target.value})}
-                        required 
+                        onChange={e => setNewChild({ ...newChild, username: e.target.value })}
+                        required
                       />
                     </div>
                   </div>
@@ -251,23 +309,23 @@ export default function FamilyPage() {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail de Acesso</label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input 
-                        type="email" 
-                        className="input-field pl-12 h-12 text-sm" 
-                        placeholder="filho@email.com" 
+                      <input
+                        type="email"
+                        className="input-field pl-12 h-12 text-sm"
+                        placeholder="filho@email.com"
                         value={newChild.email}
-                        onChange={e => setNewChild({...newChild, email: e.target.value})}
-                        required 
+                        onChange={e => setNewChild({ ...newChild, email: e.target.value })}
+                        required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Série / Ano Escolar</label>
-                    <select 
+                    <select
                       className="input-field h-12 text-sm appearance-none"
                       value={newChild.gradeLevel}
-                      onChange={e => setNewChild({...newChild, gradeLevel: e.target.value})}
+                      onChange={e => setNewChild({ ...newChild, gradeLevel: e.target.value })}
                       required
                     >
                       <option value="">Selecione a série...</option>
@@ -297,12 +355,12 @@ export default function FamilyPage() {
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nascimento</label>
                       <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input 
-                          type="date" 
-                          className="input-field pl-12 h-12 text-sm" 
+                        <input
+                          type="date"
+                          className="input-field pl-12 h-12 text-sm"
                           value={newChild.birthDate}
-                          onChange={e => setNewChild({...newChild, birthDate: e.target.value})}
-                          required 
+                          onChange={e => setNewChild({ ...newChild, birthDate: e.target.value })}
+                          required
                         />
                       </div>
                     </div>
@@ -311,12 +369,12 @@ export default function FamilyPage() {
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{isEditing ? 'Nova Senha (opcional)' : 'Senha'}</label>
                       <div className="relative">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input 
-                          type="password" 
-                          className="input-field pl-12 h-12 text-sm" 
-                          placeholder="••••••" 
+                        <input
+                          type="password"
+                          className="input-field pl-12 h-12 text-sm"
+                          placeholder="••••••"
                           value={newChild.password}
-                          onChange={e => setNewChild({...newChild, password: e.target.value})}
+                          onChange={e => setNewChild({ ...newChild, password: e.target.value })}
                           required={!isEditing}
                         />
                       </div>
@@ -324,8 +382,8 @@ export default function FamilyPage() {
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={submitting}
                   className="btn-primary w-full py-4 font-black shadow-xl shadow-blue-500/20"
                 >

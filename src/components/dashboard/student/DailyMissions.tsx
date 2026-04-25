@@ -73,7 +73,7 @@ export const DailyMissions = ({ missions }: DailyMissionsProps) => {
                 </div>
 
                 <Link 
-                  href={`/study/${mission.id}`}
+                  href={`/dashboard/study/${mission.id}`}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 group-hover:gap-4 transition-all"
                 >
                   Iniciar Jornada
