@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Coins, Gift, ShoppingBag, Check, Lock, AlertCircle } from 'lucide-react';
+import { Coins, Gift, ShoppingBag, Check, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function StudentShopPage() {
@@ -63,8 +63,22 @@ export default function StudentShopPage() {
         {loading ? (
           <div className="col-span-full flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div></div>
         ) : rewards.length === 0 ? (
-          <div className="col-span-full premium-card p-20 text-center text-slate-400 font-bold">
-            Seu responsável ainda não cadastrou nenhum prêmio. Peça para ele adicionar algo legal!
+          <div className="col-span-full premium-card p-16 bg-white dark:bg-slate-900 border-dashed border-2 flex flex-col items-center text-center space-y-6">
+            <div className="w-20 h-20 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center text-orange-600">
+               <Gift size={40} />
+            </div>
+            <div className="space-y-2">
+               <h3 className="text-xl font-black text-slate-800 dark:text-white">A Lojinha está esperando por você!</h3>
+               <p className="text-sm font-bold text-slate-500 max-w-sm mx-auto">
+                 Seu responsável ainda não cadastrou prêmios. Que tal dar um "toque" nele para adicionar algo épico?
+               </p>
+            </div>
+            <button 
+              onClick={() => alert('Notificação enviada para seu responsável! 🚀')}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-500/25 flex items-center gap-2"
+            >
+              Pedir Prêmios ao Responsável <ArrowRight size={18} />
+            </button>
           </div>
         ) : (
           rewards.map((reward) => (

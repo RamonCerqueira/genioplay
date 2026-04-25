@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Brain, ShieldAlert, TrendingUp, PlusCircle, LayoutDashboard, ChevronRight, GraduationCap, Star, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Users, Brain, ShieldAlert, TrendingUp, PlusCircle, LayoutDashboard, ChevronRight, GraduationCap, Star, CheckCircle2, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 export default function GuardianDashboard() {
   const [children, setChildren] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [redemptions, setRedemptions] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalLessons: 0,
     averageScore: 0,
@@ -36,9 +37,24 @@ export default function GuardianDashboard() {
         setChildren(data.children || []);
         setAlerts(data.alerts || []);
         setStats(data.stats);
+        fetchRedemptions();
         setLoading(false);
       });
   }, []);
+
+  const fetchRedemptions = async () => {
+    const res = await fetch('/api/guardian/redemptions');
+    const data = await res.json();
+    if (data.success) setRedemptions(data.redemptions);
+  };
+
+  const handleApprove = async (id: string, action: string) => {
+    const res = await fetch('/api/guardian/redemptions', {
+      method: 'POST',
+      body: JSON.stringify({ redemptionId: id, action })
+    });
+    if (res.ok) fetchRedemptions();
+  };
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -134,26 +150,57 @@ export default function GuardianDashboard() {
                   </div>
                 ) : (
                   children.map(child => (
-                    <Link key={child.id} href={`/dashboard/reports?studentId=${child.id}`}>
-                      <motion.div 
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-lg flex items-center justify-between group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-5">
-                          <div className="w-16 h-16 rounded-[1.5rem] bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-3xl shadow-inner border border-blue-100 dark:border-blue-800">
+                    <div key={child.id} className="premium-card bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col group">
+                      <div className="p-6 flex items-center justify-between border-b border-slate-50 dark:border-slate-800">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-3xl shadow-inner border border-blue-100 dark:border-blue-800">
                             {child.avatar || '🎓'}
                           </div>
                           <div>
                             <h3 className="text-xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{child.username}</h3>
-                            <p className="text-sm font-bold text-slate-600 dark:text-slate-400">Ver progresso detalhado</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{child.gradeLevel}</p>
                           </div>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                          <ChevronRight size={20} />
+                        <Link 
+                          href={`/dashboard/reports?studentId=${child.id}`}
+                          className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-all"
+                        >
+                          <TrendingUp size={20} />
+                        </Link>
+                      </div>
+
+                      <div className="p-6 space-y-4">
+                        <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                              <Coins size={16} fill="currentColor" />
+                            </div>
+                            <span className="text-xs font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">Moedas Gênio</span>
+                          </div>
+                          <span className="text-xl font-black text-slate-800 dark:text-white">{child.walletBalance}</span>
                         </div>
-                      </motion.div>
-                    </Link>
+
+                        <div className="space-y-2">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Destaques por Matéria</p>
+                           <div className="flex flex-wrap gap-1.5">
+                              {child.topSkills?.length > 0 ? child.topSkills.map((skill: any, i: number) => (
+                                <span key={i} className="px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg text-[9px] font-bold text-slate-600 dark:text-slate-300">
+                                  {skill.subjectName} • {skill.elo}
+                                </span>
+                              )) : (
+                                <span className="text-[9px] font-bold text-slate-400 italic">Nenhum progresso ainda</span>
+                              )}
+                           </div>
+                        </div>
+                      </div>
+                      
+                      <Link 
+                        href={`/dashboard/reports?studentId=${child.id}`}
+                        className="p-4 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-50 dark:border-slate-800 text-center text-[10px] font-black text-blue-600 hover:bg-blue-600 hover:text-white transition-all uppercase tracking-widest"
+                      >
+                        Ver Relatório Completo
+                      </Link>
+                    </div>
                   ))
                 )}
               </div>
@@ -162,37 +209,83 @@ export default function GuardianDashboard() {
             {/* Alerts Sidebar */}
             <div className="space-y-8">
               <h2 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-                <ShieldAlert className="text-rose-600" size={28} /> Alertas de Foco
-              </h2>
+                 <ShieldAlert className="text-rose-600" size={28} /> Alertas de Foco
+               </h2>
 
-              <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl space-y-8">
-                {alerts.length === 0 ? (
-                  <div className="py-12 text-center space-y-4">
-                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 mx-auto shadow-inner">
-                       <CheckCircle2 size={32} />
-                    </div>
-                    <p className="text-sm font-black text-slate-600 dark:text-slate-400 max-w-[200px] mx-auto">Foco total! Nenhum alerta recente nos estudos.</p>
-                  </div>
-                ) : (
-                  alerts.map((alert, i) => (
-                    <div key={i} className="flex items-center gap-4 group bg-rose-50 dark:bg-rose-900/10 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/20">
-                      <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-rose-600 shadow-sm">
-                        <ShieldAlert size={24} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-black text-slate-900 dark:text-white">{alert.student.username} perdeu o foco</p>
-                        <p className="text-[10px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest">{alert.type} • {new Date(alert.timestamp).toLocaleTimeString()}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-                <Link 
-                  href="/dashboard/reports" 
-                  className="block text-center text-xs font-black text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors pt-4 border-t border-slate-100 dark:border-slate-800 uppercase tracking-widest"
-                >
-                  Ver histórico completo
-                </Link>
-              </div>
+               <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl space-y-8">
+                 {alerts.length === 0 ? (
+                   <div className="py-12 text-center space-y-4">
+                     <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 mx-auto shadow-inner">
+                        <CheckCircle2 size={32} />
+                     </div>
+                     <p className="text-sm font-black text-slate-600 dark:text-slate-400 max-w-[200px] mx-auto">Foco total! Nenhum alerta recente nos estudos.</p>
+                   </div>
+                 ) : (
+                   alerts.map((alert, i) => (
+                     <div key={i} className="flex items-center gap-4 group bg-rose-50 dark:bg-rose-900/10 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/20">
+                       <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-rose-600 shadow-sm">
+                         <ShieldAlert size={24} />
+                       </div>
+                       <div>
+                         <p className="text-sm font-black text-slate-900 dark:text-white">{alert.student.username} perdeu o foco</p>
+                         <p className="text-[10px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest">{alert.type} • {new Date(alert.timestamp).toLocaleTimeString()}</p>
+                       </div>
+                     </div>
+                   ))
+                 )}
+                 <Link 
+                   href="/dashboard/reports" 
+                   className="block text-center text-xs font-black text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors pt-4 border-t border-slate-100 dark:border-slate-800 uppercase tracking-widest"
+                 >
+                   Ver histórico completo
+                 </Link>
+               </div>
+
+               {/* Seção de Recompensas Pendentes */}
+               <AnimatePresence>
+                 {redemptions.length > 0 && (
+                   <motion.div 
+                     initial={{ opacity: 0, x: 20 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     className="space-y-6"
+                   >
+                     <h2 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                       <Star className="text-amber-500" size={28} fill="currentColor" /> Prêmios para Entregar
+                     </h2>
+                     <div className="space-y-4">
+                       {redemptions.map((r) => (
+                         <div key={r.id} className="premium-card p-6 bg-amber-50/50 dark:bg-amber-900/10 border-amber-100/50 dark:border-amber-900/20">
+                           <div className="flex justify-between items-start mb-4">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-xl shadow-sm">
+                                    {r.student.avatar}
+                                 </div>
+                                 <div>
+                                    <p className="text-sm font-black text-slate-800 dark:text-white">{r.student.username} resgatou:</p>
+                                    <p className="text-xs font-bold text-blue-600 uppercase">{r.reward.title}</p>
+                                 </div>
+                              </div>
+                           </div>
+                           <div className="flex gap-2">
+                              <button 
+                                onClick={() => handleApprove(r.id, 'APPROVED')}
+                                className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                              >
+                                Marcar como Entregue
+                              </button>
+                              <button 
+                                onClick={() => handleApprove(r.id, 'REJECTED')}
+                                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 rounded-xl transition-all"
+                              >
+                                <X size={16} />
+                              </button>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </motion.div>
+                 )}
+               </AnimatePresence>
             </div>
           </div>
     </div>

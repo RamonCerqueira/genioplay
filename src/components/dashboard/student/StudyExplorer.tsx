@@ -27,9 +27,10 @@ export const StudyExplorer = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject: 'Geral', // A IA vai inferir o assunto real do tópico
+          subject: 'Geral',
           topic: searchTopic,
-          persona: 'Divertido'
+          persona: 'Tutor Divertido',
+          visualMode: 'tabuleiro'
         })
       });
 

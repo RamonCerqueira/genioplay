@@ -12,12 +12,26 @@ export async function GET() {
   }
 
   try {
-    // 1. Busca os filhos vinculados
+    // 1. Busca os filhos vinculados com métricas
     const familyMembers = await prisma.familyMember.findMany({
       where: { guardianId: session.user.id },
-      include: { student: true }
+      include: { 
+        student: {
+          include: {
+            wallet: true,
+            skills: {
+              take: 3,
+              orderBy: { updatedAt: 'desc' }
+            }
+          }
+        } 
+      }
     });
-    const children = familyMembers.map(m => m.student);
+    const children = familyMembers.map(m => ({
+      ...m.student,
+      walletBalance: m.student.wallet?.balance || 0,
+      topSkills: m.student.skills
+    }));
 
     // 2. Busca alertas recentes de foco (Anti-Cheat)
     // Buscamos eventos de foco vinculados a qualquer filho desse guardião
