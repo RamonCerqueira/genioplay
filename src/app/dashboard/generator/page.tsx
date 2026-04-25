@@ -61,8 +61,29 @@ export default function ContentGeneratorPage() {
     });
   };
 
+  const [loadingMessage, setLoadingMessage] = useState('Consultando a BNCC...');
+
   const handleGenerate = async () => {
     setLoading(true);
+    setLoadingMessage('Consultando a BNCC...');
+    
+    // Simulação de progresso para UX
+    const messages = [
+      'Consultando a BNCC...',
+      'Desenhando os cards pedagógicos...',
+      'Criando os desafios (06 questões)...',
+      'Preparando as questões bônus...',
+      'Finalizando o material de estudo...'
+    ];
+    
+    let msgIdx = 0;
+    const interval = setInterval(() => {
+      if (msgIdx < messages.length - 1) {
+        msgIdx++;
+        setLoadingMessage(messages[msgIdx]);
+      }
+    }, 4000);
+
     try {
       const res = await fetch('/api/study/generate', {
         method: 'POST',
@@ -71,14 +92,15 @@ export default function ContentGeneratorPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setGeneratedData(data.data); // Armazena o conteúdo para o gabarito
+        setGeneratedData(data.data);
         setStep(4);
       } else {
-        alert('Erro ao gerar: ' + data.error);
+        alert('Ops! O Google me disse algo estranho: ' + (data.error || 'Erro desconhecido') + '. Vamos tentar de novo? 🧐');
       }
     } catch (err) {
-      alert('Erro de conexão');
+      alert('Houve um problema de conexão ao gerar o conteúdo. Por favor, verifique sua internet e tente novamente.');
     } finally {
+      clearInterval(interval);
       setLoading(false);
     }
   };
@@ -278,7 +300,10 @@ export default function ContentGeneratorPage() {
                 className="btn-secondary flex-1"
               >
                 {loading ? (
-                  <Loader2 className="animate-spin" size={24} />
+                  <div className="flex flex-col items-center gap-3 py-2">
+                    <Loader2 className="animate-spin" size={32} />
+                    <span className="text-sm font-black animate-pulse">{loadingMessage}</span>
+                  </div>
                 ) : (
                   <>Gerar Conteúdo Agora <Sparkles size={20} /></>
                 )}

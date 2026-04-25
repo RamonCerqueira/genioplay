@@ -64,38 +64,51 @@ export const generateStudyContent = async (data: {
     return getMockData(data.topic);
   }
 
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [{
-          role: "user",
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          temperature: 0.7
-        }
-      })
-    });
+  const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
+  let lastError = null;
 
-    const result = await response.json();
-    
-    if (result.error) {
-      console.error("Erro retornado pelo Gemini:", result.error);
-      return getMockData(data.topic);
+  for (const modelName of models) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [{
+            role: "user",
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            responseMimeType: "application/json"
+          }
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.error) {
+        console.warn(`Erro no modelo ${modelName}:`, result.error.message);
+        lastError = result.error;
+        continue; // Tenta o próximo modelo
+      }
+
+      let contentText = result.candidates[0].content.parts[0].text;
+      contentText = contentText.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      const content = JSON.parse(contentText);
+      return content as AIStudyPackage;
+
+    } catch (error: any) {
+      console.error(`Erro crítico no modelo ${modelName}:`, error.message);
+      lastError = error;
     }
-
-    const contentText = result.candidates[0].content.parts[0].text;
-    const content = JSON.parse(contentText);
-    return content as AIStudyPackage;
-
-  } catch (error) {
-    console.error("Erro crítico na chamada do Gemini:", error);
-    return getMockData(data.topic);
   }
+
+  // Se chegou aqui, todos os modelos falharam
+  console.error("Falha total na IA após tentar todos os modelos:", lastError);
+  return getMockData(topic);
 };
 
 function getMockData(topic: string): AIStudyPackage {
