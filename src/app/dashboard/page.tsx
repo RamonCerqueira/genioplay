@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Brain, ShieldAlert, TrendingUp, PlusCircle, LayoutDashboard, ChevronRight, GraduationCap, Star, CheckCircle2, X } from 'lucide-react';
+import { Users, Brain, ShieldAlert, TrendingUp, PlusCircle, LayoutDashboard, ChevronRight, GraduationCap, Star, CheckCircle2, X, Coins } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
