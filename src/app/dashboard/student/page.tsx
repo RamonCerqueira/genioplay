@@ -11,9 +11,9 @@ export default function StudentDashboard() {
   const [studentName, setStudentName] = useState('Estudante');
   const [stats, setStats] = useState({
     balance: 0,
-    streak: 3,
-    xp: 1250,
-    progress: 15
+    streak: 0,
+    xp: 0,
+    progress: 0
   });
   const [loading, setLoading] = useState(true);
 

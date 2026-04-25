@@ -33,7 +33,7 @@ const NavItem = ({ href, icon: Icon, label, active }: NavItemProps) => (
   </Link>
 );
 
-export default function MobileNav({ role }: { role: 'STUDENT' | 'GUARDIAN' }) {
+export default function MobileNav({ role }: { role: 'STUDENT' | 'GUARDIAN' | 'ADMIN' }) {
   const pathname = usePathname();
 
   return (

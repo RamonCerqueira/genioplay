@@ -5,6 +5,36 @@ import { BrainCircuit, Github, Instagram, Linkedin, Twitter } from 'lucide-react
 import Link from 'next/link';
 
 export default function LandingFooter() {
+  const sections = [
+    {
+      title: 'Plataforma',
+      links: [
+        { label: 'Sobre Nós', href: '/about' },
+        { label: 'Benefícios', href: '/#benefits' },
+        { label: 'Planos', href: '/pricing' },
+        { label: 'Metodologia', href: '/methodology' },
+      ]
+    },
+    {
+      title: 'Suporte',
+      links: [
+        { label: 'Centro de Ajuda', href: '/help' },
+        { label: 'Contato', href: '/contact' },
+        { label: 'FAQs', href: '/help#faqs' },
+        { label: 'Comunidade', href: '/community' },
+      ]
+    },
+    {
+      title: 'Legal',
+      links: [
+        { label: 'Termos de Uso', href: '/privacy?tab=terms' },
+        { label: 'Privacidade', href: '/privacy?tab=privacy' },
+        { label: 'Segurança', href: '/privacy?tab=security' },
+        { label: 'Cookies', href: '/privacy?tab=cookies' },
+      ]
+    }
+  ];
+
   return (
     <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pt-24 pb-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-8">
@@ -31,38 +61,24 @@ export default function LandingFooter() {
           </div>
 
           {/* Links Sections */}
-          <div className="space-y-6">
-            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Plataforma</h4>
-            <ul className="space-y-4">
-              {['Sobre Nós', 'Benefícios', 'Planos', 'Metodologia'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors">{item}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Suporte</h4>
-            <ul className="space-y-4">
-              {['Centro de Ajuda', 'Contato', 'FAQs', 'Comunidade'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors">{item}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Legal</h4>
-            <ul className="space-y-4">
-              {['Termos de Uso', 'Privacidade', 'Segurança', 'Cookies'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors">{item}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {sections.map((section) => (
+            <div key={section.title} className="space-y-6">
+              <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">{section.title}</h4>
+              <ul className="space-y-4">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link 
+                      href={link.href} 
+                      scroll={false}
+                      className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         {/* Bottom Bar */}
