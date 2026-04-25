@@ -31,11 +31,13 @@ export const generateStudyContent = async (data: {
   previousAnswers?: any[],
   gabarito?: any[]
 }): Promise<AIStudyPackage> => {
-  let apiKey = process.env.GEMINI_API_KEY;
+  let geminiKey = process.env.GEMINI_API_KEY;
+  let openaiKey = process.env.OPENAI_API_KEY;
 
   try {
     const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
-    if (config?.geminiApiKey) apiKey = config.geminiApiKey;
+    if (config?.geminiApiKey) geminiKey = config.geminiApiKey;
+    if (config?.openaiApiKey) openaiKey = config.openaiApiKey;
   } catch (error) { }
 
   const visualMode = data.visualMode || 'linear';
@@ -85,69 +87,194 @@ export const generateStudyContent = async (data: {
     REGRAS: Retornar APENAS o JSON. 6 questões na avaliação (3 fáceis, 2 médias, 1 difícil). 2 bônus.
   `;
 
-  if (!apiKey) return getMockData(data.topic);
+  // 1. TENTATIVA COM GEMINI
+  if (geminiKey) {
+    const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
+    for (const modelName of models) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 35000);
 
-  const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
-  let lastError = null;
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${geminiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.6, response_mime_type: "application/json" }
+            })
+          });
 
-  for (const modelName of models) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
+          clearTimeout(timeout);
+          const result = await response.json();
+          if (result.error) {
+            console.error(`Gemini Error (${modelName}):`, result.error);
+            continue;
+          }
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.6, responseMimeType: "application/json" }
-          })
-        });
+          const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!text) throw new Error("Resposta vazia do Gemini");
 
-        clearTimeout(timeout);
-        const result = await response.json();
-        if (result.error) { lastError = result.error; continue; }
-
-        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) throw new Error("Vazio");
-
-        const match = text.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error("JSON não encontrado");
-        const rawContent = JSON.parse(match[0]);
-
-        // Mapeamento para compatibilidade com o frontend atual
-        return {
-          summary: rawContent.conteudo.resumo,
-          cards: [
-            { title: rawContent.conteudo.titulo, content: rawContent.conteudo.explicacao }
-          ],
-          questions: rawContent.avaliacao.questoes.map((q: any) => ({
-            text: q.pergunta,
-            options: q.alternativas,
-            correctIndex: q.resposta_correta,
-            difficulty: q.dificuldade || 'MEDIUM',
-            explanation: q.explicacao
-          })),
-          bonusQuestions: rawContent.avaliacao.bonus.map((b: any) => ({
-            text: b.pergunta,
-            options: ["Entendi!", "Pode repetir?", "Interessante", "Díficil!"], // Fallback pois o bônus agora é aberto
-            correctIndex: 0,
-            difficulty: 'BONUS',
-            explanation: b.explicacao
-          })),
-          metadata: rawContent // Salva TUDO (trilha, tabuleiro, análise)
-        };
-
-      } catch (error: any) {
-        lastError = error;
+          return parseAIResponse(text);
+        } catch (error: any) {
+          console.error(`Falha no Gemini (${modelName}, tentativa ${attempt + 1}):`, error.message);
+        }
       }
+    }
+  }
+
+  // 2. FALLBACK PARA OPENAI (GPT-4o-mini)
+  if (openaiKey) {
+    try {
+      console.log("Acionando fallback: OpenAI GPT-4o-mini");
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 35000);
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          response_format: { type: "json_object" },
+          temperature: 0.6
+        })
+      });
+
+      clearTimeout(timeout);
+      const result = await response.json();
+      if (result.error) throw new Error(result.error.message);
+
+      const text = result?.choices?.[0]?.message?.content;
+      if (!text) throw new Error("Resposta vazia da OpenAI");
+
+      return parseAIResponse(text);
+    } catch (error: any) {
+      console.error("Falha na OpenAI (Fallback):", error.message);
     }
   }
 
   return getMockData(data.topic);
 };
+
+export const chatWithAI = async (params: {
+  prompt: string,
+  history?: { role: string, parts: { text: string }[] }[],
+  systemInstruction?: string
+}): Promise<string> => {
+  let geminiKey = process.env.GEMINI_API_KEY;
+  let openaiKey = process.env.OPENAI_API_KEY;
+
+  try {
+    const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
+    if (config?.geminiApiKey) geminiKey = config.geminiApiKey;
+    if (config?.openaiApiKey) openaiKey = config.openaiApiKey;
+  } catch (error) { }
+
+  const fullHistory = params.history || [];
+  const systemPrompt = params.systemInstruction || "Você é um assistente educativo de elite.";
+
+  // 1. Gemini Try
+  if (geminiKey) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            { role: "user", parts: [{ text: systemPrompt }] },
+            { role: "model", parts: [{ text: "Entendido. Serei seu assistente educativo de elite. 🚀" }] },
+            ...fullHistory,
+            { role: "user", parts: [{ text: params.prompt }] }
+          ]
+        })
+      });
+
+      const result = await response.json();
+      if (!result.error && result.candidates?.[0]?.content?.parts?.[0]?.text) {
+        return result.candidates[0].content.parts[0].text;
+      }
+      console.error("Gemini Chat Error:", result.error);
+    } catch (e: any) {
+      console.error("Gemini Chat Exception:", e.message);
+    }
+  }
+
+  // 2. OpenAI Fallback
+  if (openaiKey) {
+    try {
+      console.log("Chat Fallback: OpenAI GPT-4o-mini");
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...fullHistory.map(h => ({
+          role: h.role === 'model' ? 'assistant' : 'user',
+          content: h.parts[0].text
+        })),
+        { role: "user", content: params.prompt }
+      ];
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages,
+          temperature: 0.7
+        })
+      });
+
+      const result = await response.json();
+      if (result.choices?.[0]?.message?.content) {
+        return result.choices[0].message.content;
+      }
+      console.error("OpenAI Chat Error:", result.error);
+    } catch (e: any) {
+      console.error("OpenAI Chat Exception:", e.message);
+    }
+  }
+
+  return "Desculpe, estou com dificuldades técnicas agora e não consegui processar sua mensagem. Por favor, tente novamente em alguns instantes. 🛠️";
+};
+
+// Função auxiliar para processar o JSON da IA de forma segura
+function parseAIResponse(text: string): AIStudyPackage {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("JSON não encontrado na resposta");
+  const rawContent = JSON.parse(match[0]);
+
+  return {
+    summary: rawContent.conteudo?.resumo || "Resumo indisponível",
+    cards: [
+      { 
+        title: rawContent.conteudo?.titulo || "Conteúdo do Estudo", 
+        content: rawContent.conteudo?.explicacao || "Não foi possível carregar a explicação." 
+      }
+    ],
+    questions: (rawContent.avaliacao?.questoes || []).map((q: any) => ({
+      text: q.pergunta,
+      options: q.alternativas,
+      correctIndex: q.resposta_correta,
+      difficulty: q.dificuldade || 'MEDIUM',
+      explanation: q.explicacao
+    })),
+    bonusQuestions: (rawContent.avaliacao?.bonus || []).map((b: any) => ({
+      text: b.pergunta,
+      options: ["Entendi!", "Interessante", "Mais ou menos", "Fácil!"],
+      correctIndex: 0,
+      difficulty: 'BONUS',
+      explanation: b.explicacao
+    })),
+    metadata: rawContent
+  };
+}
 
 
 

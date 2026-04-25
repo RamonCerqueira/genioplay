@@ -289,5 +289,6 @@ model SystemConfig {
   stripeSecretKey   String?
   stripePublicKey   String?
   geminiApiKey      String?
+  openaiApiKey      String?
   updatedAt         DateTime @updatedAt
 }

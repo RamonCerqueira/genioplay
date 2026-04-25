@@ -50,7 +50,8 @@ function AdminMasterContent() {
     mpPublicKey: '',
     stripeSecretKey: '',
     stripePublicKey: '',
-    geminiApiKey: ''
+    geminiApiKey: '',
+    openaiApiKey: ''
   });
   const [loading, setLoading] = useState(true);
   const [savingConfig, setSavingConfig] = useState(false);
@@ -527,27 +528,43 @@ function AdminMasterContent() {
                     )}
                  </AnimatePresence>
 
-                 {/* IA Configuration */}
-                 <div className="pt-8 border-t border-slate-100 dark:border-slate-800 space-y-6">
-                    <div className="flex items-center gap-3 text-blue-600">
-                       <BrainCircuit size={20} />
-                       <h3 className="font-black uppercase text-xs tracking-widest">Inteligência Artificial (Gemini)</h3>
-                    </div>
-                    <div className="space-y-3">
-                       <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Google Gemini API Key</label>
-                       <div className="relative">
-                          <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                          <input 
-                            type="password" 
-                            value={config.geminiApiKey}
-                            onChange={(e) => setConfig({...config, geminiApiKey: e.target.value})}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-6 py-4 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
-                            placeholder="Digite sua chave do Google Gemini..."
-                          />
-                       </div>
-                       <p className="text-[10px] text-slate-400 font-bold italic">Esta chave é usada para gerar as lições BNCC e o Chat do Tutor.</p>
-                    </div>
-                 </div>
+                  {/* IA Configuration */}
+                  <div className="pt-8 border-t border-slate-100 dark:border-slate-800 space-y-6">
+                     <div className="flex items-center gap-3 text-blue-600">
+                        <BrainCircuit size={20} />
+                        <h3 className="font-black uppercase text-xs tracking-widest">Inteligência Artificial (Google & OpenAI)</h3>
+                     </div>
+                     <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                           <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Google Gemini API Key</label>
+                           <div className="relative">
+                              <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                              <input 
+                                type="password" 
+                                value={config.geminiApiKey || ''}
+                                onChange={(e) => setConfig({...config, geminiApiKey: e.target.value})}
+                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-6 py-4 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
+                                placeholder="AIzaSy..."
+                              />
+                           </div>
+                        </div>
+
+                        <div className="space-y-3">
+                           <label className="text-xs font-black text-slate-400 uppercase tracking-widest">OpenAI API Key (Fallback)</label>
+                           <div className="relative">
+                              <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                              <input 
+                                type="password" 
+                                value={config.openaiApiKey || ''}
+                                onChange={(e) => setConfig({...config, openaiApiKey: e.target.value})}
+                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-6 py-4 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
+                                placeholder="sk-..."
+                              />
+                           </div>
+                        </div>
+                     </div>
+                     <p className="text-[10px] text-slate-400 font-bold italic">O GênioPlay tentará usar o Gemini primeiro. Se falhar, usará o GPT-4o-mini como backup automático.</p>
+                  </div>
 
                  <button 
                    onClick={handleSaveConfig}

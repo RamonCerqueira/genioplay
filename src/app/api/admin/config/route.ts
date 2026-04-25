@@ -38,7 +38,8 @@ export async function POST(request: Request) {
         mpPublicKey: data.mpPublicKey,
         stripeSecretKey: data.stripeSecretKey,
         stripePublicKey: data.stripePublicKey,
-        geminiApiKey: data.geminiApiKey
+        geminiApiKey: data.geminiApiKey,
+        openaiApiKey: data.openaiApiKey
       },
       create: {
         id: 'global',
@@ -47,7 +48,8 @@ export async function POST(request: Request) {
         mpPublicKey: data.mpPublicKey,
         stripeSecretKey: data.stripeSecretKey,
         stripePublicKey: data.stripePublicKey,
-        geminiApiKey: data.geminiApiKey
+        geminiApiKey: data.geminiApiKey,
+        openaiApiKey: data.openaiApiKey
       }
     });
 
