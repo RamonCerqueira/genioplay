@@ -41,6 +41,7 @@ export async function GET(request: Request) {
       studentName: studySession.student.username,
       topic: topic.name,
       subject: topic.subject.name,
+      metadata: topic.metadata,
       flashcards: topic.flashcards.map(f => ({ id: f.id, title: f.front, content: f.back })),
       questions: topic.questions.map(q => ({
         id: q.id,

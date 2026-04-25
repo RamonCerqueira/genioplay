@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Square, AlertCircle, ChevronRight, ChevronLeft, CheckCircle2, XCircle, Timer, Sparkles, Coins, Loader2, MessageCircle, Brain, Bot, ChevronDown } from 'lucide-react';
+import { Play, Pause, Square, AlertCircle, ChevronRight, ChevronLeft, CheckCircle2, XCircle, Timer, Sparkles, Coins, Loader2, MessageCircle, Brain, Bot, ChevronDown, Map as MapIcon, LayoutGrid } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { io } from 'socket.io-client';
+import { BoardPlayer } from './BoardPlayer';
 
 interface StudyPlayerProps {
   sessionId: string;
@@ -26,6 +27,9 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
   const [quizScore, setQuizScore] = useState(0);
   const [socket, setSocket] = useState<any>(null);
   const [balance, setBalance] = useState(0);
+
+  const [currentPhase, setCurrentPhase] = useState<any>(null);
+  const [boardView, setBoardView] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -90,6 +94,9 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
       const data = await res.json();
       if (data.success) {
         setSessionData(data);
+        if (data.metadata?.trilha?.modo === 'tabuleiro') {
+          setBoardView(true);
+        }
       }
     } catch (err) {
       console.error('Error fetching session data');
@@ -132,11 +139,16 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
 
     setTimeout(() => {
       setSelectedOption(null);
-      if (currentQuestion < sessionData.questions.length - 1) {
+      if (currentQuestion < (currentPhase ? currentPhase.teste.length : sessionData.questions.length) - 1) {
         setCurrentQuestion(prev => prev + 1);
       } else {
         setIsQuizMode(false);
         setCurrentQuestion(0);
+        if (currentPhase) {
+           setCurrentPhase(null);
+           setBoardView(true);
+           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
       }
     }, 2000);
   };
@@ -311,7 +323,24 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
           </div>
 
           <AnimatePresence mode="wait">
-            {!isQuizMode ? (
+            {boardView && sessionData?.metadata?.trilha ? (
+              <motion.div
+                key="board"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <BoardPlayer 
+                  trilha={sessionData.metadata.trilha} 
+                  onStartPhase={(phase) => {
+                    setCurrentPhase(phase);
+                    setIsQuizMode(true);
+                    setCurrentQuestion(0);
+                    setBoardView(false);
+                  }}
+                />
+              </motion.div>
+            ) : !isQuizMode ? (
               <motion.div 
                 key="cards"
                 initial={{ opacity: 0, x: 20 }}

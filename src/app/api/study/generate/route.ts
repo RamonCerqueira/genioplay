@@ -16,10 +16,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    let { studentIds, subject, topic, gradeLevel, persona } = await request.json();
+    let { studentIds, subject, topic, gradeLevel, persona, visualMode, previousAnswers, gabarito } = await request.json();
     
     let guardianId = session.user.id;
-    let studentIdForAI = session.user.id;
 
     if (isStudent) {
       const family = await prisma.familyMember.findFirst({
@@ -69,11 +68,14 @@ export async function POST(request: Request) {
 
     // 3. Gera o conteúdo via IA
     const aiContent = await generateStudyContent({
-      studentName: "Estudante",
+      studentName: session.user.username || "Estudante",
       subject,
       topic,
       gradeLevel,
-      persona
+      persona,
+      visualMode,
+      previousAnswers,
+      gabarito
     });
 
     // 4. Persiste no Banco de Dados
@@ -89,6 +91,7 @@ export async function POST(request: Request) {
           subjectId: subjectRecord.id,
           name: topic,
           description: aiContent.summary,
+          metadata: aiContent.metadata || {},
           flashcards: {
             create: aiContent.cards.map(c => ({ front: c.title, back: c.content }))
           },

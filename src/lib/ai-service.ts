@@ -149,17 +149,7 @@ export const generateStudyContent = async (data: {
   return getMockData(data.topic);
 };
 
-function getMockData(topic: string): AIStudyPackage {
-  return {
-    summary: `Conteúdo sobre ${topic}`,
-    cards: [{ title: `Estudando ${topic}`, content: "Conteúdo temporário..." }],
-    questions: [],
-    bonusQuestions: []
-  };
-}
-ptions.length !== 4) throw new Error(`Questão bônus ${i+1} deve ter 4 opções`);
-  });
-}
+
 
 function getMockData(topic: string): AIStudyPackage {
   return {
