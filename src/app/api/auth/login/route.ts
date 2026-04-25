@@ -18,6 +18,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'E-mail não encontrado' }, { status: 404 });
     }
 
+    if (user.isBlocked) {
+      return NextResponse.json({ success: false, error: 'Sua conta está suspensa por motivos administrativos. Entre em contato com o suporte.' }, { status: 403 });
+    }
+
     const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
 
     if (user.passwordHash !== passwordHash) {

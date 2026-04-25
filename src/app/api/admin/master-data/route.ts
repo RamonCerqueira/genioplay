@@ -15,8 +15,9 @@ export async function GET() {
   try {
     // 1. Busca todos os usuários (Poderia ter paginação)
     const users = await prisma.user.findMany({
+      include: { subscription: true },
       orderBy: { createdAt: 'desc' },
-      take: 50
+      take: 100
     });
 
     // 2. Calcula métricas financeiras (Simulado com base nas assinaturas ativas)

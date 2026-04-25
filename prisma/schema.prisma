@@ -44,6 +44,7 @@ model User {
   city         String?
   state        String?
   gradeLevel   String?   // Para Alunos: Série/Ano escolar
+  isBlocked    Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -274,4 +275,14 @@ model SupportMessage {
   text        String
   isFromAdmin Boolean       @default(false)
   createdAt   DateTime      @default(now())
+}
+
+model SystemConfig {
+  id                String   @id @default("global")
+  paymentGateway    String   @default("MERCADO_PAGO") // MERCADO_PAGO ou STRIPE
+  mpAccessToken     String?
+  mpPublicKey       String?
+  stripeSecretKey   String?
+  stripePublicKey   String?
+  updatedAt         DateTime @updatedAt
 }
