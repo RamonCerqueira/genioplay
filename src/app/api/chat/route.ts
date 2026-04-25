@@ -10,18 +10,18 @@ export async function POST(req: Request) {
 
   try {
     const { message } = await req.json();
-    
+
     // 1. Busca Chave Híbrida
     let apiKey = process.env.GEMINI_API_KEY;
     try {
       const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
       if (config?.geminiApiKey) apiKey = config.geminiApiKey;
-    } catch (e) {}
+    } catch (e) { }
 
     if (!apiKey) {
-      return NextResponse.json({ 
-        role: 'assistant', 
-        content: 'Olá! Meu cérebro está um pouco desligado agora porque não encontrei minha chave de acesso (API Key). 🛠️🧠' 
+      return NextResponse.json({
+        role: 'assistant',
+        content: 'Olá! Meu cérebro está um pouco desligado agora porque não encontrei minha chave de acesso (API Key). 🛠️🧠'
       });
     }
 
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       Pergunta do Aluno: "${message}"
     `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -54,9 +54,9 @@ export async function POST(req: Request) {
     });
 
     const result = await response.json();
-    
+
     if (result.error) {
-       throw new Error(result.error.message);
+      throw new Error(result.error.message);
     }
 
     const reply = result.candidates[0].content.parts[0].text;
@@ -64,9 +64,9 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error('ERRO NO CHAT REST:', error);
-    return NextResponse.json({ 
-      role: 'assistant', 
-      content: `Ops! Tive um pequeno curto-circuito na minha conexão com o Google: "${error.message}". Vamos tentar de novo? 🧐` 
+    return NextResponse.json({
+      role: 'assistant',
+      content: `Ops! Tive um pequeno curto-circuito na minha conexão com o Google: "${error.message}". Vamos tentar de novo? 🧐`
     });
   }
 }

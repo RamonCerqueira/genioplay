@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     try {
       const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
       if (config?.geminiApiKey) apiKey = config.geminiApiKey;
-    } catch (e) {}
+    } catch (e) { }
 
     if (!apiKey) {
       return NextResponse.json({ success: false, error: 'IA Temporariamente offline (Chave não encontrada)' });
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
                   Explique o "porquê" das coisas.
                   Se o aluno perguntar algo fora do tópico, tente trazê-lo de volta gentilmente.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -47,9 +47,9 @@ export async function POST(request: Request) {
     });
 
     const result = await response.json();
-    
+
     if (result.error) {
-       throw new Error(result.error.message);
+      throw new Error(result.error.message);
     }
 
     const text = result.candidates[0].content.parts[0].text;

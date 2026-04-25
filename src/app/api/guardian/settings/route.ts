@@ -14,6 +14,13 @@ export async function GET() {
       select: {
         username: true,
         email: true,
+        cpf: true,
+        phone: true,
+        birthDate: true,
+        cep: true,
+        address: true,
+        city: true,
+        state: true,
       }
     });
 

@@ -18,6 +18,8 @@ export default function SettingsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [rewardCategory, setRewardCategory] = useState('Todos');
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
 
   const [profile, setProfile] = useState({
     username: '',
@@ -108,6 +110,38 @@ export default function SettingsPage() {
       }
     } catch (err) {
       console.error('Delete error');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordData.new !== passwordData.confirm) {
+      notify({ title: 'Erro', message: 'As senhas não coincidem', type: 'WARNING' });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/guardian/profile/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordData.current,
+          newPassword: passwordData.new
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        notify({ title: 'Senha Alterada', message: 'Sua senha foi atualizada com sucesso.', type: 'SUCCESS' });
+        setIsPasswordModalOpen(false);
+        setPasswordData({ current: '', new: '', confirm: '' });
+      } else {
+        notify({ title: 'Erro', message: data.error || 'Falha ao alterar senha', type: 'WARNING' });
+      }
+    } catch (err) {
+      notify({ title: 'Erro', message: 'Erro de conexão', type: 'WARNING' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -248,7 +282,12 @@ export default function SettingsPage() {
                        <h4 className="text-xl font-black">Segurança Pro</h4>
                        <p className="text-slate-400 text-sm font-bold">Seus dados estão protegidos com criptografia de nível bancário.</p>
                     </div>
-                    <button className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-sm transition-all border border-white/10">Alterar Senha</button>
+                    <button 
+                      onClick={() => setIsPasswordModalOpen(true)}
+                      className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-sm transition-all border border-white/10"
+                    >
+                      Alterar Senha
+                    </button>
                   </div>
                   <Lock className="absolute -right-8 -bottom-8 text-white/5" size={200} />
                </div>
@@ -470,6 +509,49 @@ export default function SettingsPage() {
                   </div>
                   <button type="submit" disabled={submitting} className="btn-primary w-full py-5 text-lg font-black shadow-xl shadow-blue-500/20">
                      {submitting ? <Loader2 className="animate-spin mx-auto" /> : 'Confirmar Recompensa'}
+                  </button>
+               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      
+      {/* Modal de Alterar Senha */}
+      <AnimatePresence>
+        {isPasswordModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPasswordModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-3xl relative z-[101]">
+               <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tighter">Alterar Senha</h2>
+                  <button onClick={() => setIsPasswordModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                     <X size={24} className="text-slate-400" />
+                  </button>
+               </div>
+               <form onSubmit={handleChangePassword} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Senha Atual</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type="password" placeholder="••••••••" className="input-field pl-12" value={passwordData.current} onChange={e => setPasswordData({...passwordData, current: e.target.value})} required />
+                    </div>
+                  </div>
+                  <div className="space-y-2 pt-4 border-t border-slate-50 dark:border-slate-800">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nova Senha</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type="password" placeholder="Mínimo 6 caracteres" className="input-field pl-12" value={passwordData.new} onChange={e => setPasswordData({...passwordData, new: e.target.value})} required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirmar Nova Senha</label>
+                    <div className="relative">
+                      <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type="password" placeholder="Repita a nova senha" className="input-field pl-12" value={passwordData.confirm} onChange={e => setPasswordData({...passwordData, confirm: e.target.value})} required />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={submitting} className="btn-primary w-full py-5 text-lg font-black shadow-xl shadow-blue-500/20">
+                     {submitting ? <Loader2 className="animate-spin mx-auto" /> : 'Atualizar Senha'}
                   </button>
                </form>
             </motion.div>

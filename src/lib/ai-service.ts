@@ -36,7 +36,7 @@ export const generateStudyContent = async (data: {
   try {
     const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
     if (config?.geminiApiKey) apiKey = config.geminiApiKey;
-  } catch (error) {}
+  } catch (error) { }
 
   const visualMode = data.visualMode || 'linear';
   const prompt = `
@@ -96,7 +96,7 @@ export const generateStudyContent = async (data: {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 30000);
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
