@@ -19,7 +19,7 @@ export async function GET() {
         student: {
           include: {
             wallet: true,
-            skills: {
+            skillLevels: {
               take: 3,
               orderBy: { updatedAt: 'desc' }
             }
@@ -30,7 +30,7 @@ export async function GET() {
     const children = familyMembers.map(m => ({
       ...m.student,
       walletBalance: m.student.wallet?.balance || 0,
-      topSkills: m.student.skills
+      topSkills: m.student.skillLevels
     }));
 
     // 2. Busca alertas recentes de foco (Anti-Cheat)
