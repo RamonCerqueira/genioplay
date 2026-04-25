@@ -78,6 +78,7 @@ docker compose up -d
 npm install
 npx prisma generate
 npm run build
+npx prisma db push
 ```
 
 **C. Iniciar com PM2:**

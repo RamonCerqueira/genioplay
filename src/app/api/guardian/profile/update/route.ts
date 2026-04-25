@@ -4,25 +4,29 @@ import { getSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   const session = await getSession();
-  if (!session || session.user.role !== 'GUARDIAN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
 
   try {
-    const { username } = await request.json();
-
-    if (!username) return NextResponse.json({ error: 'Nome de usuário é obrigatório' }, { status: 400 });
+    const data = await request.json();
+    const userId = session.user.id;
 
     const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: { username }
+      where: { id: userId },
+      data: {
+        username: data.username,
+        cpf: data.cpf,
+        phone: data.phone,
+        birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
+        cep: data.cep,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+      }
     });
 
     return NextResponse.json({ success: true, user: updatedUser });
   } catch (error: any) {
-    if (error.code === 'P2002') {
-      return NextResponse.json({ success: false, error: 'Este nome de usuário já está em uso' }, { status: 400 });
-    }
-    return NextResponse.json({ success: false, error: 'Erro ao atualizar perfil' }, { status: 500 });
+    console.error('Update profile error:', error);
+    return NextResponse.json({ error: 'Erro ao atualizar perfil' }, { status: 500 });
   }
 }

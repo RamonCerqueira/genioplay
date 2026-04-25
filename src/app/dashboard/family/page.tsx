@@ -12,15 +12,18 @@ import {
   ChevronRight, 
   Mail,
   Calendar,
-  Baby
+  Baby,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 
 export default function FamilyPage() {
   const [children, setChildren] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [newChild, setNewChild] = useState({ 
     username: '', 
     email: '',
@@ -50,25 +53,48 @@ export default function FamilyPage() {
     }
   };
 
-  const handleAddChild = async (e: React.FormEvent) => {
+  const openEditModal = (child: any) => {
+    setIsEditing(true);
+    setSelectedChildId(child.id);
+    setNewChild({
+      username: child.username,
+      email: child.email || '',
+      birthDate: child.birthDate ? new Date(child.birthDate).toISOString().split('T')[0] : '',
+      password: '', // Senha fica vazia na edição a menos que mude
+      gradeLevel: child.gradeLevel || '',
+      avatar: child.avatar || '🎓'
+    });
+    setIsModalOpen(true);
+  };
+
+  const openAddModal = () => {
+    setIsEditing(false);
+    setSelectedChildId(null);
+    setNewChild({ username: '', email: '', birthDate: '', password: '', gradeLevel: '', avatar: '🎓' });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
 
+    const endpoint = isEditing ? '/api/family/update' : '/api/family/add';
+    const payload = isEditing ? { ...newChild, id: selectedChildId } : newChild;
+
     try {
-      const res = await fetch('/api/family/add', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newChild),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
       if (data.success) {
         setIsModalOpen(false);
-        setNewChild({ username: '', email: '', birthDate: '', password: '', gradeLevel: '', avatar: '🎓' });
         fetchChildren();
       } else {
-        setError(data.error || 'Erro ao cadastrar');
+        setError(data.error || 'Erro ao processar');
       }
     } catch (err) {
       setError('Erro de conexão');
@@ -91,7 +117,7 @@ export default function FamilyPage() {
             </div>
 
             <button 
-              onClick={() => setIsModalOpen(true)}
+              onClick={openAddModal}
               className="btn-primary py-4 px-8 shadow-xl shadow-blue-500/20 flex items-center gap-2 group"
             >
               <Plus size={20} className="group-hover:rotate-90 transition-transform" /> 
@@ -114,7 +140,7 @@ export default function FamilyPage() {
                    </p>
                 </div>
                 <button 
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={openAddModal}
                   className="btn-primary px-10 py-4 shadow-xl shadow-blue-500/20"
                 >
                   Cadastrar Filho
@@ -122,35 +148,43 @@ export default function FamilyPage() {
               </div>
             ) : (
               children.map(child => (
-                <Link key={child.id} href={`/dashboard/students/${child.id}`}>
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.02 }}
-                    className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/20 dark:shadow-none flex items-center justify-between group hover:border-blue-200 transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 rounded-[2rem] bg-slate-50 dark:bg-blue-900/20 flex items-center justify-center text-5xl shadow-inner group-hover:scale-110 transition-transform">
-                        {child.avatar || '🎓'}
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-2xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">{child.username}</h3>
-                        <div className="flex items-center gap-2 text-emerald-500">
-                           <CheckCircle2 size={14} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Conta Ativa</span>
-                        </div>
+                <motion.div 
+                  key={child.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/20 dark:shadow-none flex items-center justify-between group hover:border-blue-200 transition-all relative overflow-hidden"
+                >
+                  <div className="flex items-center gap-6">
+                    <div className="w-20 h-20 rounded-[2.5rem] bg-slate-50 dark:bg-blue-900/20 flex items-center justify-center text-5xl shadow-inner group-hover:scale-110 transition-transform">
+                      {child.avatar || '🎓'}
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">{child.username}</h3>
+                      <div className="flex items-center gap-3">
+                         <div className="flex items-center gap-1.5 text-emerald-500">
+                            <CheckCircle2 size={12} />
+                            <span className="text-[9px] font-black uppercase tracking-widest">Ativo</span>
+                         </div>
+                         <span className="text-[9px] font-black bg-slate-100 dark:bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full uppercase">{child.gradeLevel}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <ChevronRight size={24} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </motion.div>
-                </Link>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                     <button 
+                        onClick={() => openEditModal(child)}
+                        className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center"
+                        title="Editar Perfil"
+                     >
+                        <Pencil size={18} />
+                     </button>
+                  </div>
+                </motion.div>
               ))
             )}
           </div>
 
-      {/* Modal de Cadastro - Compacto e Premium */}
+      {/* Modal de Cadastro/Edição */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -166,24 +200,24 @@ export default function FamilyPage() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-3xl relative z-[101] overflow-hidden"
+              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[3rem] p-8 shadow-3xl relative z-[101] overflow-hidden"
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
               
               <div className="flex justify-between items-center mb-6">
                 <div>
-                   <h2 className="text-2xl font-black text-slate-800 dark:text-white">Novo Filho</h2>
-                   <p className="text-xs font-bold text-slate-500">Crie a conta de acesso para seu pequeno gênio.</p>
+                   <h2 className="text-2xl font-black text-slate-800 dark:text-white">{isEditing ? 'Editar Perfil' : 'Novo Filho'}</h2>
+                   <p className="text-xs font-bold text-slate-500">{isEditing ? 'Atualize os dados do seu gênio.' : 'Crie a conta de acesso para seu pequeno gênio.'}</p>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                   <X size={24} className="text-slate-400" />
                 </button>
               </div>
 
-              <form onSubmit={handleAddChild} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {error && <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold text-center border border-red-100">{error}</div>}
 
-                {/* Avatar Selection - Mais compacto */}
+                {/* Avatar Selection */}
                 <div className="flex flex-wrap justify-center gap-2">
                   {avatars.map(a => (
                     <button 
@@ -251,9 +285,9 @@ export default function FamilyPage() {
                         <option value="9º Ano">9º Ano</option>
                       </optgroup>
                       <optgroup label="Ensino Médio">
-                        <option value="1º Série">1ª Série</option>
-                        <option value="2º Série">2ª Série</option>
-                        <option value="3º Série">3ª Série (Vestibular)</option>
+                        <option value="1ª Série">1ª Série</option>
+                        <option value="2ª Série">2ª Série</option>
+                        <option value="3ª Série">3ª Série (Vestibular)</option>
                       </optgroup>
                     </select>
                   </div>
@@ -274,7 +308,7 @@ export default function FamilyPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Senha</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{isEditing ? 'Nova Senha (opcional)' : 'Senha'}</label>
                       <div className="relative">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input 
@@ -283,7 +317,7 @@ export default function FamilyPage() {
                           placeholder="••••••" 
                           value={newChild.password}
                           onChange={e => setNewChild({...newChild, password: e.target.value})}
-                          required 
+                          required={!isEditing}
                         />
                       </div>
                     </div>
@@ -295,7 +329,7 @@ export default function FamilyPage() {
                   disabled={submitting}
                   className="btn-primary w-full py-4 font-black shadow-xl shadow-blue-500/20"
                 >
-                  {submitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Cadastrar Filho'}
+                  {submitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : isEditing ? 'Salvar Alterações' : 'Cadastrar Filho'}
                 </button>
               </form>
             </motion.div>

@@ -39,7 +39,7 @@ export default function LandingFooter() {
     <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pt-24 pb-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
-          
+
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-3">
@@ -52,11 +52,11 @@ export default function LandingFooter() {
               Transformando o tempo de tela em aprendizado real. A plataforma definitiva para famílias que buscam educação de elite e diversão gamificada.
             </p>
             <div className="flex items-center gap-4">
-               {[Instagram, Linkedin, Twitter, Github].map((Icon, idx) => (
-                 <a key={idx} href="#" className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all">
-                    <Icon size={20} />
-                 </a>
-               ))}
+              {[Instagram, Linkedin, Twitter, Github].map((Icon, idx) => (
+                <a key={idx} href="#" className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all">
+                  <Icon size={20} />
+                </a>
+              ))}
             </div>
           </div>
 
@@ -67,9 +67,8 @@ export default function LandingFooter() {
               <ul className="space-y-4">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <Link 
-                      href={link.href} 
-                      scroll={false}
+                    <Link
+                      href={link.href}
                       className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors"
                     >
                       {link.label}
@@ -87,11 +86,11 @@ export default function LandingFooter() {
             © 2026 GênioPlay. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-8">
-             <div className="flex items-center gap-2 text-xs font-black text-emerald-500 uppercase tracking-widest">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Sistemas Online
-             </div>
-             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Feito por DevTec</p>
+            <div className="flex items-center gap-2 text-xs font-black text-emerald-500 uppercase tracking-widest">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Sistemas Online
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Feito por DevTec</p>
           </div>
         </div>
       </div>
