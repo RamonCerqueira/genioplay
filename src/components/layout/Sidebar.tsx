@@ -17,6 +17,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function Sidebar({ 
   role, 
@@ -131,6 +132,11 @@ export default function Sidebar({
                </p>
             </div>
           )}
+        </div>
+        
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-4 px-4'} py-3.5 rounded-2xl text-slate-500 dark:text-slate-400 group`}>
+           <ThemeToggle />
+           {!isCollapsed && <span className="font-black text-sm uppercase tracking-widest">Tema</span>}
         </div>
         
         <Link href="/logout">

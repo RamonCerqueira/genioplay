@@ -26,6 +26,7 @@ export default function FamilyPage() {
     email: '',
     birthDate: '',
     password: '', 
+    gradeLevel: '',
     avatar: '🎓' 
   });
   const [submitting, setSubmitting] = useState(false);
@@ -64,7 +65,7 @@ export default function FamilyPage() {
       const data = await res.json();
       if (data.success) {
         setIsModalOpen(false);
-        setNewChild({ username: '', email: '', birthDate: '', password: '', avatar: '🎓' });
+        setNewChild({ username: '', email: '', birthDate: '', password: '', gradeLevel: '', avatar: '🎓' });
         fetchChildren();
       } else {
         setError(data.error || 'Erro ao cadastrar');
@@ -225,6 +226,36 @@ export default function FamilyPage() {
                         required 
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Série / Ano Escolar</label>
+                    <select 
+                      className="input-field h-12 text-sm appearance-none"
+                      value={newChild.gradeLevel}
+                      onChange={e => setNewChild({...newChild, gradeLevel: e.target.value})}
+                      required
+                    >
+                      <option value="">Selecione a série...</option>
+                      <optgroup label="Ensino Fundamental I">
+                        <option value="1º Ano">1º Ano</option>
+                        <option value="2º Ano">2º Ano</option>
+                        <option value="3º Ano">3º Ano</option>
+                        <option value="4º Ano">4º Ano</option>
+                        <option value="5º Ano">5º Ano</option>
+                      </optgroup>
+                      <optgroup label="Ensino Fundamental II">
+                        <option value="6º Ano">6º Ano</option>
+                        <option value="7º Ano">7º Ano</option>
+                        <option value="8º Ano">8º Ano</option>
+                        <option value="9º Ano">9º Ano</option>
+                      </optgroup>
+                      <optgroup label="Ensino Médio">
+                        <option value="1º Série">1ª Série</option>
+                        <option value="2º Série">2ª Série</option>
+                        <option value="3º Série">3ª Série (Vestibular)</option>
+                      </optgroup>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

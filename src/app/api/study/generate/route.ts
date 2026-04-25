@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { studentIds, subject, topic, persona } = await request.json();
+    const { studentIds, subject, topic, gradeLevel, persona } = await request.json();
     const plan = await getSubscriptionStatus(session.user.id);
 
     // 1. Validar Limite de Estudantes
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       }, { status: 403 });
     }
 
-    // 2. Validar Limite de Lições Mensais (Simplificado: conta todas as lições do mês)
+    // 2. Validar Limite de Lições Mensais
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     const lessonCount = await prisma.generatedLesson.count({
@@ -41,29 +41,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Nenhum estudante selecionado' }, { status: 400 });
     }
 
-    // 1. Gera o conteúdo via IA uma única vez
+    if (!gradeLevel) {
+      return NextResponse.json({ error: 'A série/ano do aluno é obrigatória' }, { status: 400 });
+    }
+
+    // 3. Gera o conteúdo via IA
     const aiContent = await generateStudyContent({
       studentName: "Estudante",
       subject,
       topic,
+      gradeLevel,
       persona
     });
 
-    // 2. Persiste no Banco de Dados para cada estudante
+    // 4. Persiste no Banco de Dados
     const results = await prisma.$transaction(async (tx) => {
-      // Cria ou busca a matéria
       const subjectRecord = await tx.subject.upsert({
         where: { name: subject },
         update: {},
         create: { name: subject }
       });
 
-      // Cria o Tópico
       const topicRecord = await tx.topic.create({
         data: {
           subjectId: subjectRecord.id,
           name: topic,
-          description: `Conteúdo personalizado gerado pela IA (${persona})`,
+          description: `Conteúdo para ${gradeLevel} - Persona: ${persona}`,
           flashcards: {
             create: aiContent.cards.map(c => ({ front: c.title, back: c.content }))
           },
@@ -96,7 +99,6 @@ export async function POST(request: Request) {
         }
       });
 
-      // Vincula a aula a TODOS os estudantes selecionados
       const lessons = await Promise.all(studentIds.map(sid => 
         tx.generatedLesson.create({
           data: {
@@ -108,11 +110,14 @@ export async function POST(request: Request) {
       ));
 
       return lessons;
-    });
+    }, { timeout: 30000 });
 
-    return NextResponse.json({ success: true, count: results.length });
+    return NextResponse.json({ success: true, count: results.length, data: aiContent });
   } catch (error: any) {
-    console.error('Error generating AI content:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('CRITICAL ERROR generating AI content:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message || 'Erro interno na IA' 
+    }, { status: 500 });
   }
 }

@@ -21,19 +21,22 @@ export const generateStudyContent = async (data: {
   studentName: string,
   subject: string,
   topic: string,
-  persona: string
+  persona: string,
+  gradeLevel: string
 }): Promise<AIStudyPackage> => {
   const apiKey = process.env.GEMINI_API_KEY;
 
   const prompt = `
     Você é um tutor acadêmico de nível sênior com a persona: "${data.persona}".
-    Sua missão é criar um material de estudo PROFUNDO e ABRANGENTE para o aluno "${data.studentName}" sobre "${data.topic}" (${data.subject}).
+    Sua missão é criar um material de estudo PROFUNDO e ABRANGENTE para o aluno "${data.studentName}", que está no ${data.gradeLevel}.
+    O assunto é "${data.topic}" (${data.subject}).
 
     REGRAS PEDAGÓGICAS CRÍTICAS:
+    - O conteúdo DEVE ser alinhado à BNCC para o ${data.gradeLevel}.
+    - Adapte a complexidade da linguagem e dos exemplos para a idade típica de um aluno do ${data.gradeLevel}.
     - NUNCA dê explicações genéricas ou curtas.
-    - Cada card informativo deve conter a teoria explicada de forma clara, seguida de pelo menos 2 exemplos práticos do mundo real.
+    - Cada card informativo deve conter a teoria explicada de forma clara, seguida de pelo menos 2 exemplos práticos do mundo real adequados à série.
     - Use analogias para facilitar a compreensão de conceitos complexos.
-    - O tom deve ser encorajador e educativo.
 
     VOCÊ DEVE RESPONDER APENAS COM UM OBJETO JSON VÁLIDO.
     O JSON deve seguir EXATAMENTE este formato:
@@ -62,17 +65,17 @@ export const generateStudyContent = async (data: {
   }
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         contents: [{
+          role: "user",
           parts: [{ text: prompt }]
         }],
         generationConfig: {
-          response_mime_type: "application/json",
           temperature: 0.7
         }
       })

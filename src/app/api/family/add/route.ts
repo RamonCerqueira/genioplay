@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { username, email, birthDate, password, avatar } = await request.json();
+    const { username, email, birthDate, password, avatar, gradeLevel } = await request.json();
 
     if (!username || !email || !password) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
           passwordHash,
           role: 'STUDENT',
           avatar: avatar || '🎓',
+          gradeLevel,
         }
       });
 

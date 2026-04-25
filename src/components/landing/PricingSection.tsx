@@ -9,8 +9,8 @@ export default function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   return (
-    <section id="precos" className="py-32 bg-slate-50 dark:bg-slate-900/50">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="precos" className="py-40 bg-slate-50 dark:bg-slate-900/50">
+      <div className="max-w-7xl mx-auto px-8">
         <div className="text-center max-w-3xl mx-auto mb-20 space-y-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

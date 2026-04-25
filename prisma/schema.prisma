@@ -43,6 +43,7 @@ model User {
   address      String?
   city         String?
   state        String?
+  gradeLevel   String?   // Para Alunos: Série/Ano escolar
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
