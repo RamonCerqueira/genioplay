@@ -155,14 +155,15 @@ export const generateStudyContent = async (data: {
 
   // Se chegou aqui, todos os modelos falharam
   console.error("Falha total na IA após tentar todos os modelos:", lastError);
-  return getMockData(topic);
+  return getMockData(data.topic);
 };
 
 function getMockData(topic: string): AIStudyPackage {
   return {
+    summary: `Esta é uma síntese automática de exemplo sobre ${topic}. No conteúdo real gerado pela IA, você verá aqui uma explicação pedagógica completa e motivadora sobre o tema.`,
     cards: [
       { title: `Introdução a ${topic}`, content: "Este é um conteúdo de exemplo gerado pelo sistema porque a API do Gemini não está configurada ou a chamada falhou." },
-      { title: "Ponto importante", content: "Certifique-se de que a GEMINI_API_KEY está correta nas variáveis de ambiente (.env)." }
+      { title: "Ponto importante", content: "Certifique-se de que a GEMINI_API_KEY está correta nas variáveis de ambiente (.env) ou no painel Admin." }
     ],
     questions: [
       { text: `Qual o conceito principal de ${topic}?`, options: ["Opção A", "Opção B", "Opção C", "Opção D"], correctIndex: 0, difficulty: 'EASY', explanation: "A explicação detalhada apareceria aqui." },
