@@ -284,5 +284,6 @@ model SystemConfig {
   mpPublicKey       String?
   stripeSecretKey   String?
   stripePublicKey   String?
+  geminiApiKey      String?
   updatedAt         DateTime @updatedAt
 }

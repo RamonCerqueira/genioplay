@@ -414,38 +414,43 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
           </AnimatePresence>
         </div>
       </div>
-      {/* AI Tutor Chat Floating Button */}
-      <div className="fixed bottom-8 right-8 z-[60]">
+      {/* AI Tutor Chat Floating Button - Reposicionado para Mobile */}
+      <div className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-[60]">
         <button 
           onClick={() => setIsChatOpen(!isChatOpen)}
-          className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group relative"
+          className="w-14 h-14 md:w-16 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group relative"
         >
-          {isChatOpen ? <XCircle size={32} /> : <MessageCircle size={32} />}
+          {isChatOpen ? <XCircle size={28} className="md:w-8 md:h-8" /> : <MessageCircle size={28} className="md:w-8 md:h-8" />}
           {!isChatOpen && (
-            <span className="absolute -top-12 right-0 bg-white text-blue-600 px-4 py-2 rounded-xl text-xs font-black shadow-xl whitespace-nowrap animate-bounce border border-blue-100">
+            <span className="absolute -top-12 right-0 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] md:text-xs font-black shadow-xl whitespace-nowrap animate-bounce border border-blue-100 dark:border-slate-700">
               Dúvida? Fale comigo! 👋
             </span>
           )}
         </button>
       </div>
 
-      {/* Chat Window */}
+      {/* Chat Window - Responsiva */}
       <AnimatePresence>
         {isChatOpen && (
           <motion.div 
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-28 right-8 w-[380px] h-[500px] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl z-[60] flex flex-col overflow-hidden border border-blue-100 dark:border-slate-800"
+            className="fixed bottom-0 md:bottom-28 right-0 md:right-8 w-full md:w-[380px] h-[90vh] md:h-[500px] bg-white dark:bg-slate-900 rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-2xl z-[100] flex flex-col overflow-hidden border border-blue-100 dark:border-slate-800"
           >
-            <div className="bg-blue-600 p-6 text-white flex items-center gap-3">
-               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  <Brain size={24} />
+            <div className="bg-blue-600 p-6 text-white flex items-center justify-between">
+               <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Brain size={24} />
+                 </div>
+                 <div>
+                    <h4 className="font-black">GênioPlay Tutor</h4>
+                    <p className="text-[10px] font-bold text-blue-100 uppercase tracking-widest">IA Inteligente • Online</p>
+                 </div>
                </div>
-               <div>
-                  <h4 className="font-black">GênioPlay Tutor</h4>
-                  <p className="text-[10px] font-bold text-blue-100 uppercase tracking-widest">IA Inteligente • Online</p>
-               </div>
+               <button onClick={() => setIsChatOpen(false)} className="md:hidden p-2 hover:bg-white/10 rounded-full">
+                 <ChevronRight size={24} className="rotate-90" />
+               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">

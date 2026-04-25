@@ -38,9 +38,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   return (
     <NotificationContext.Provider value={{ notify }}>
       {children}
-      <div className="fixed inset-0 pointer-events-none z-[9999] flex items-center justify-center p-6">
-        <div className="flex flex-col gap-4 items-center">
-          <AnimatePresence>
+      <div className="fixed top-0 left-0 right-0 pointer-events-none z-[9999] flex flex-col items-center p-6 gap-4">
+        <AnimatePresence>
             {notifications.map((n) => (
               <EducationalToast key={n.id} notification={n} onClose={() => setNotifications(prev => prev.filter(item => item.id !== n.id))} />
             ))}

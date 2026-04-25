@@ -4,6 +4,7 @@ import React from 'react';
 import { LucideIcon, LayoutDashboard, BookOpen, Gift, Users, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavItemProps {
   href: string;
@@ -37,7 +38,7 @@ export default function MobileNav({ role }: { role: 'STUDENT' | 'GUARDIAN' | 'AD
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass-card px-6 py-3 flex justify-between items-center w-[90%] max-w-md shadow-2xl shadow-blue-900/10 border-white/80 md:hidden">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass-card px-4 py-2 flex justify-between items-center w-[95%] max-w-md shadow-2xl shadow-blue-900/20 border-white/40 md:hidden gap-1">
       <NavItem href="/dashboard" icon={LayoutDashboard} label="Início" active={pathname === '/dashboard'} />
       {role === 'STUDENT' ? (
         <>
@@ -46,10 +47,18 @@ export default function MobileNav({ role }: { role: 'STUDENT' | 'GUARDIAN' | 'AD
         </>
       ) : (
         <>
-          <NavItem href="/dashboard/family" icon={Users} label="Filhos" active={pathname === '/dashboard/family'} />
+          <NavItem href="/dashboard/family" icon={Users} label="Família" active={pathname === '/dashboard/family'} />
           <NavItem href="/dashboard/settings" icon={Gift} label="Prêmios" active={pathname === '/dashboard/settings'} />
         </>
       )}
+
+      <div className="h-10 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
+
+      <div className="flex flex-col items-center gap-1">
+        <ThemeToggle />
+        <span className="text-[8px] font-black text-slate-400 uppercase">Tema</span>
+      </div>
+
       <NavItem href="/logout" icon={LogOut} label="Sair" />
     </nav>
   );

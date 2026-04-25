@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         data: {
           subjectId: subjectRecord.id,
           name: topic,
-          description: `Conteúdo para ${gradeLevel} - Persona: ${persona}`,
+          description: aiContent.summary,
           flashcards: {
             create: aiContent.cards.map(c => ({ front: c.title, back: c.content }))
           },

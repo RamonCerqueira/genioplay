@@ -325,6 +325,14 @@ export default function ContentGeneratorPage() {
                 <CheckCircle2 size={48} />
               </div>
               <h2 className="text-3xl font-black text-slate-800 dark:text-white">Conteúdo Gerado com Sucesso!</h2>
+              <div className="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-3xl border border-blue-100 dark:border-blue-800/50 text-left max-w-3xl mx-auto">
+                 <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                   <Sparkles size={14} /> Resumo Pedagógico do Gênio
+                 </p>
+                 <p className="text-sm text-slate-600 dark:text-slate-300 font-bold leading-relaxed">
+                   {generatedData.summary}
+                 </p>
+              </div>
               <p className="text-slate-500 dark:text-slate-400 font-bold max-w-xl mx-auto">
                 O material já está disponível no dashboard dos seus filhos. Confira abaixo o resumo pedagógico e o gabarito.
               </p>

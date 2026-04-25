@@ -25,7 +25,7 @@ export default async function DashboardLayout({
       
       {/* Área de Conteúdo com Respiro */}
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 p-6 md:p-10 lg:p-16 transition-all duration-500">
+        <main className="flex-1 p-6 pb-32 md:pb-10 md:p-10 lg:p-16 transition-all duration-500">
           <div className="max-w-[1800px] mx-auto">
             {children}
           </div>

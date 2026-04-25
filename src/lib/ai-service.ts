@@ -12,10 +12,13 @@ export interface AIQuestion {
 }
 
 export interface AIStudyPackage {
+  summary: string;
   cards: AICard[];
   questions: AIQuestion[];
   bonusQuestions: AIQuestion[];
 }
+
+import prisma from '@/lib/prisma';
 
 export const generateStudyContent = async (data: {
   studentName: string,
@@ -24,39 +27,83 @@ export const generateStudyContent = async (data: {
   persona: string,
   gradeLevel: string
 }): Promise<AIStudyPackage> => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // 1. Tenta buscar a chave do Banco de Dados primeiro (Configuração do Admin)
+  // 2. Se não houver no banco, usa a variável de ambiente do .env
+  let apiKey = process.env.GEMINI_API_KEY;
+
+  try {
+    const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
+    if (config?.geminiApiKey) {
+      apiKey = config.geminiApiKey;
+    }
+  } catch (error) {
+    console.error("Erro ao buscar geminiApiKey no banco, usando fallback .env");
+  }
 
   const prompt = `
-    Você é um tutor acadêmico de nível sênior com a persona: "${data.persona}".
-    Sua missão é criar um material de estudo PROFUNDO e ABRANGENTE para o aluno "${data.studentName}", que está no ${data.gradeLevel}.
-    O assunto é "${data.topic}" (${data.subject}).
+    Aja como um PROFESSOR ESPECIALISTA em ensino infantil e fundamental com foco em aprendizado real e profundo.
+    
+    OBJETIVO:
+    Criar um material de estudo PROGRESSIVO e EFICAZ para o aluno "${data.studentName}", que está no ${data.gradeLevel}.
+    TEMA: "${data.topic}" (${data.subject}).
+    PERSONA DO PROFESSOR: "${data.persona}".
 
-    REGRAS PEDAGÓGICAS CRÍTICAS:
-    - O conteúdo DEVE ser alinhado à BNCC para o ${data.gradeLevel}.
-    - Adapte a complexidade da linguagem e dos exemplos para a idade típica de um aluno do ${data.gradeLevel}.
-    - NUNCA dê explicações genéricas ou curtas.
-    - Cada card informativo deve conter a teoria explicada de forma clara, seguida de pelo menos 2 exemplos práticos do mundo real adequados à série.
-    - Use analogias para facilitar a compreensão de conceitos complexos.
+    DIRETRIZES PEDAGÓGICAS (OBRIGATÓRIO):
+    1. CONSTRUÇÃO DO CONHECIMENTO: Explique de forma clara e progressiva (Simples → Intermediário → Aprofundado).
+    2. O "PORQUÊ" É A CHAVE: Não explique apenas "o que" é o assunto, mas "por que" ele funciona e como ele se aplica no mundo real.
+    3. EXEMPLOS PRÁTICOS: Use analogias e exemplos do dia a dia da criança na idade do ${data.gradeLevel}.
+    4. ANTICIPAÇÃO DE DÚVIDAS: Identifique e esclareça dentro da explicação as dúvidas mais comuns sobre este tema.
+    5. SEM INFANTILIZAÇÃO: Use linguagem adequada, mas não subestime a inteligência do aluno. Foque em aprendizado real.
+
+    TAREFA 1: GERAR UM RESUMO PEDAGÓGICO (summary)
+    - Uma síntese de 2 a 3 parágrafos que explique a essência do aprendizado de forma motivadora.
+
+    TAREFA 2: GERAR ENTRE 3 A 6 CARDS DE CONTEÚDO (cards)
+    - O número de cards deve depender da complexidade do tema.
+    - Card 1: Sempre comece com o Conceito básico e uma Analogia forte.
+    - Cards intermediários: Desenvolva a teoria com exemplos práticos e o "porquê" das coisas.
+    - Card Final: Conclua com aplicação no mundo real, curiosidade e um incentivo ao estudo.
+
+    TAREFA 3: GERAR 6 QUESTÕES (questions)
+    - Dificuldade Progressiva: 2 Fáceis (conceito), 2 Médias (entendimento), 2 Difíceis (aplicação).
+    - 4 alternativas cada, apenas 1 correta.
+    - Alternativas plausíveis (evite absurdas).
+    - FOCO: Testar compreensão real, não memorização.
+
+    TAREFA 4: GERAR 2 QUESTÕES BÔNUS (bonusQuestions)
+    - Desafios que exijam raciocínio e explicação do porquê.
 
     VOCÊ DEVE RESPONDER APENAS COM UM OBJETO JSON VÁLIDO.
-    O JSON deve seguir EXATAMENTE este formato:
+    FORMATO EXATO:
     {
+      "summary": "string síntese",
       "cards": [
-        { "title": "...", "content": "Explicação teórica densa + Analogia + Exemplos 1, 2 e 3" }
+        { "title": "string impactante", "content": "explicação densa e didática" }
       ],
       "questions": [
-        { "text": "Pergunta contextualizada", "options": ["A", "B", "C", "D"], "correctIndex": 0, "difficulty": "EASY", "explanation": "Explicação detalhada de por que esta é a resposta correta e por que as outras estão erradas." }
+        { 
+          "text": "pergunta contextualizada", 
+          "options": ["string","string","string","string"], 
+          "correctIndex": 0, 
+          "difficulty": "EASY/MEDIUM/HARD", 
+          "explanation": "explicação do porquê esta é a correta" 
+        }
       ],
       "bonusQuestions": [
-        { "text": "Desafio de aplicação real", "options": ["A", "B", "C"], "correctIndex": 0, "difficulty": "BONUS", "explanation": "..." }
+        { 
+          "text": "pergunta desafio", 
+          "options": ["string","string","string"], 
+          "correctIndex": 0, 
+          "difficulty": "BONUS", 
+          "explanation": "explicação do raciocínio" 
+        }
       ]
     }
 
-    Regras:
-    - Gere 3 cards explicativos.
-    - Gere 6 questões (3 fáceis, 2 médias, 1 difícil).
-    - Gere 2 questões bônus.
-    - Use a linguagem da persona.
+    REGRAS CRÍTICAS:
+    - Nunca retornar campos vazios.
+    - Linguagem da persona: "${data.persona}".
+    - Alinhamento total com a BNCC para o ${data.gradeLevel}.
   `;
 
   if (!apiKey) {
