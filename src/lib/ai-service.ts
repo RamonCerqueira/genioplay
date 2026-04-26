@@ -22,6 +22,10 @@ export interface AIStudyPackage {
   questions: AIQuestion[];
   bonusQuestions: AIQuestion[];
   metadata?: any;
+  trilha?: {
+    modo: string;
+    fases: any[];
+  };
 }
 
 // =========================
@@ -59,13 +63,13 @@ export const generateStudyContent = async (data: {
     return cached.content as unknown as AIStudyPackage;
   }
 
-  const prompt = buildPrompt(data);
+  const prompt = data.visualMode === 'tabuleiro' ? buildBoardPrompt(data) : buildLinearPrompt(data);
 
   // =========================
   // GEMINI
   // =========================
   if (geminiKey) {
-    const models = ["gemini-2.0-flash", "gemini-3-flash", "gemini-1.5-flash"];
+    const models = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-3-flash", "gemini-1.5-flash"];
 
     for (const model of models) {
       for (let attempt = 0; attempt < 2; attempt++) {
@@ -120,6 +124,8 @@ export const generateStudyContent = async (data: {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
 
+      const prompt = data.visualMode === 'tabuleiro' ? buildBoardPrompt(data) : buildLinearPrompt(data);
+      
       const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -170,7 +176,7 @@ export const chatWithAI = async (params: {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -193,128 +199,53 @@ export const chatWithAI = async (params: {
 };
 
 // =========================
-// PROMPT
+// PROMPTS ESPECIALIZADOS
 // =========================
-function buildPrompt(data: any): string {
+
+function buildLinearPrompt(data: any): string {
   return `
-Você é um sistema educacional avançado, especialista em ensino adaptativo, pedagogia moderna e explicação profunda.
+Você é um Tutor Senior. Gere uma lição LINEAR e PROFUNDA.
+Foco: Explicação textual rica e sequência de flashcards.
 
-OBJETIVO:
-Gerar um material de estudo COMPLETO, DETALHADO, DIDÁTICO e PROGRESSIVO para o aluno.
+TEMA: ${data.topic}
+ALUNO: ${data.studentName} (${data.gradeLevel})
+PERSONA: ${data.persona}
 
-DADOS:
-Aluno: ${data.studentName}
-Matéria: ${data.subject}
-Tema: ${data.topic}
-Nível: ${data.gradeLevel}
-Persona: ${data.persona}
-Modo Visual: ${data.visualMode || 'linear'}
-
----
-
-DIRETRIZES DE QUALIDADE (OBRIGATÓRIO):
-
-- Explique como se estivesse ensinando alguém que NUNCA viu o assunto
-- Use linguagem clara, progressiva e sem pular etapas
-- Sempre responda:
-  - O que é
-  - Por que isso existe
-  - Como funciona
-  - Onde é aplicado na vida real
-- Use exemplos práticos e reais
-- Use analogias simples quando possível
-- Evite respostas curtas ou superficiais
-- Evite frases genéricas
-- Ensine de forma envolvente
-
----
-
-CONTEÚDO DEVE TER:
-
-1. Introdução clara ao tema
-2. Explicação detalhada passo a passo
-3. Exemplos práticos
-4. Aplicações reais
-5. Possíveis erros comuns
-6. Dicas para memorizar
-7. Conexões com outros temas
-
----
-
-AVALIAÇÃO:
-
-- 6 questões obrigatórias:
-  - 3 fáceis (conceito básico)
-  - 2 médias (interpretação)
-  - 1 difícil (raciocínio)
-- 2 questões bônus (desafio/reflexão)
-
-Cada questão deve ter:
-- Enunciado claro
-- 4 alternativas plausíveis
-- Apenas 1 correta
-- Explicação detalhada da resposta
-
----
-
-FORMATO JSON OBRIGATÓRIO:
-
+ESTRUTURA JSON:
 {
-  "conteudo": {
-    "titulo": "string",
-    "explicacao": "explicação EXTREMAMENTE detalhada e didática",
-    "resumo": "resumo claro e objetivo"
-  },
-  "avaliacao": {
-    "questoes": [
-      {
-        "pergunta": "string",
-        "alternativas": ["A","B","C","D"],
-        "resposta_correta": 0,
-        "dificuldade": "EASY|MEDIUM|HARD",
-        "explicacao": "explicação completa da resposta"
-      }
-    ],
-    "bonus": [
-      {
-        "pergunta": "string",
-        "resposta_correta_sugerida": "string",
-        "explicacao": "explicação do raciocínio"
-      }
-    ]
-  },
-  "analise": {
-    "acertos": 0,
-    "erros": 0,
-    "nivel": "iniciante|intermediario|avancado"
-  },
-  "feedback": {
-    "geral": "feedback motivador e explicativo",
-    "erros": []
-  },
-  "plano_estudo": [
-    {
-      "topico": "string",
-      "descricao": "o que estudar",
-      "objetivo": "por que estudar isso"
-    }
-  ],
-  "trilha": {
-    "modo": "${data.visualMode || 'linear'}",
-    "fases": []
-  }
+  "summary": "resumo",
+  "conteudo": { "titulo": "string", "explicacao": "longa", "resumo": "curto" },
+  "avaliacao": { "questoes": [], "bonus": [] },
+  "trilha": { "modo": "linear", "fases": [] }
+}
+(Siga as diretrizes de profundidade pedagógica)`;
 }
 
----
+function buildBoardPrompt(data: any): string {
+  return `
+Você é um Game Designer Educacional. Gere um TABULEIRO DE AVENTURA.
+Foco: Transformar o tema "${data.topic}" em uma jornada com fases.
 
-REGRAS FINAIS (CRÍTICO):
+DADOS: ${data.studentName}, ${data.gradeLevel}, Persona: ${data.persona}
 
-- NÃO escrever nada fora do JSON
-- NÃO usar markdown
-- NÃO resumir demais
-- NÃO simplificar demais
-- GERAR CONTEÚDO RICO, PROFUNDO E ENSINÁVEL
-- GARANTIR QUE O ALUNO CONSIGA APRENDER SÓ COM ESSE MATERIAL
+REGRAS DO TABULEIRO:
+- Crie de 3 a 5 fases no campo "fases".
+- Cada fase deve ser um sub-tópico do tema principal.
+- Use coordenadas X, Y entre -2 e 2 para espalhar no mapa.
+- tipos_visuais permitidos: 'ilha', 'planeta', 'plataforma', 'castelo'.
+
+ESTRUTURA JSON:
+{
+  "summary": "resumo da aventura",
+  "conteudo": { "titulo": "Nome do Mundo", "explicacao": "Intro", "resumo": "" },
+  "avaliacao": { "questoes": [], "bonus": [] },
+  "trilha": { 
+     "modo": "tabuleiro", 
+     "fases": [
+       { "id": 1, "nome": "Subtópico", "posicao": {"x":0,"y":0,"z":0}, "tipo_visual": "ilha", "conexoes": [2], "teste": [] }
+     ] 
+  }
+}
 `;
 }
 
@@ -360,7 +291,8 @@ function parseAIResponse(text: string): AIStudyPackage {
         difficulty: "BONUS",
         explanation: b.explicacao || ""
       })),
-      metadata: json
+      metadata: json,
+      trilha: json.trilha || { modo: 'linear', fases: [] }
     };
 
   } catch (err) {

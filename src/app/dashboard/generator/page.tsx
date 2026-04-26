@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BrainCircuit, BookOpen, User, Sparkles, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { BrainCircuit, BookOpen, User, Sparkles, ChevronRight, CheckCircle2, Loader2, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ContentGeneratorPage() {
@@ -13,6 +13,7 @@ export default function ContentGeneratorPage() {
     topic: '',
     gradeLevel: '',
     persona: 'Divertido',
+    visualMode: 'linear' as 'linear' | 'tabuleiro'
   });
   const [loading, setLoading] = useState(false);
   const [generatedData, setGeneratedData] = useState<any>(null);
@@ -286,6 +287,28 @@ export default function ContentGeneratorPage() {
                       }`}
                   >
                     {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <label className="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                <LayoutDashboard size={16} /> Experiência Visual
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { id: 'linear', label: 'Jornada Linear', desc: 'Cards e Quiz clássicos' },
+                  { id: 'tabuleiro', label: 'Tabuleiro 3D', desc: 'Mapa gamificado com fases' }
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setFormData({ ...formData, visualMode: m.id as any })}
+                    className={`p-6 rounded-2xl border-2 transition-all text-left flex flex-col gap-2 ${formData.visualMode === m.id ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 text-slate-500 hover:border-slate-200'
+                      }`}
+                  >
+                    <span className="font-black">{m.label}</span>
+                    <span className="text-[10px] opacity-70 uppercase tracking-widest font-bold">{m.desc}</span>
                   </button>
                 ))}
               </div>

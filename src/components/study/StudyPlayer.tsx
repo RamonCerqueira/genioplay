@@ -53,9 +53,13 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
       const data = await res.json();
       if (data.success) {
         setSessionData(data);
-        if (data.metadata?.trilha?.modo === 'tabuleiro') setBoardView(true);
+        if (data.metadata?.trilha?.modo === 'tabuleiro') {
+          setBoardView(true);
+        }
         
-        // Saudação inicial do Tutor baseada no tema
+        // Ativa o timer automaticamente ao carregar
+        setIsActive(true);
+        
         setChatHistory([
           { role: 'model', content: `Olá! Prepare-se para dominar o tema "${data.topic}"! 🚀 Estou aqui para tirar qualquer dúvida e te ajudar a ganhar muitas LarCoins. Vamos começar?` }
         ]);
@@ -66,6 +70,21 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
       setLoading(false);
     }
   };
+
+  // Lógica do Cronômetro
+  useEffect(() => {
+    let interval: any = null;
+    if (isActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      clearInterval(interval);
+      setIsActive(false);
+      alert("Tempo de foco encerrado! Que tal uma pausa?");
+    }
+    return () => clearInterval(interval);
+  }, [isActive, timeLeft]);
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || isTyping) return;
