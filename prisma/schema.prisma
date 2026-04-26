@@ -43,7 +43,7 @@ model User {
   address      String?
   city         String?
   state        String?
-  gradeLevel   String?   // Para Alunos: Série/Ano escolar
+  gradeLevel   String? // Para Alunos: Série/Ano escolar
   isBlocked    Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -105,17 +105,17 @@ model Subject {
 }
 
 model Topic {
-  id          String            @id @default(cuid())
-  subjectId   String
-  subject     Subject           @relation(fields: [subjectId], references: [id])
-  name        String
-  description String?
-  difficulty  Int               @default(1) // 1 a 10
-  questions   Question[]
-  flashcards  Flashcard[]
-  lessons     GeneratedLesson[]
+  id            String            @id @default(cuid())
+  subjectId     String
+  subject       Subject           @relation(fields: [subjectId], references: [id])
+  name          String
+  description   String?
+  difficulty    Int               @default(1) // 1 a 10
+  questions     Question[]
+  flashcards    Flashcard[]
+  lessons       GeneratedLesson[]
   studySessions StudySession[]
-  metadata      Json?             // Para armazenar estruturas complexas como Tabuleiro 3D, trilhas, etc.
+  metadata      Json? // Para armazenar estruturas complexas como Tabuleiro 3D, trilhas, etc.
 }
 
 model Flashcard {
@@ -258,16 +258,16 @@ model Referral {
 }
 
 model SupportTicket {
-  id          String           @id @default(cuid())
-  ticketNumber String          @unique // ex: #Gen1, #Gen2
-  userId      String
-  user        User             @relation(fields: [userId], references: [id])
-  subject     String
-  status      String           @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
-  priority    String           @default("MEDIUM") // LOW, MEDIUM, HIGH
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  messages    SupportMessage[]
+  id           String           @id @default(cuid())
+  ticketNumber String           @unique // ex: #Gen1, #Gen2
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  subject      String
+  status       String           @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
+  priority     String           @default("MEDIUM") // LOW, MEDIUM, HIGH
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  messages     SupportMessage[]
 }
 
 model SupportMessage {
@@ -282,13 +282,22 @@ model SupportMessage {
 }
 
 model SystemConfig {
-  id                String   @id @default("global")
-  paymentGateway    String   @default("MERCADO_PAGO") // MERCADO_PAGO ou STRIPE
-  mpAccessToken     String?
-  mpPublicKey       String?
-  stripeSecretKey   String?
-  stripePublicKey   String?
-  geminiApiKey      String?
-  openaiApiKey      String?
-  updatedAt         DateTime @updatedAt
+  id              String   @id @default("global")
+  paymentGateway  String   @default("MERCADO_PAGO") // MERCADO_PAGO ou STRIPE
+  mpAccessToken   String?
+  mpPublicKey     String?
+  stripeSecretKey String?
+  stripePublicKey String?
+  geminiApiKey    String?
+  openaiApiKey    String?
+  updatedAt       DateTime @updatedAt
+}
+
+model AICache {
+  id        String   @id @default(cuid())
+  topic     String
+  content   Json // 🔥 melhor que String (já salva como JSON real)
+  createdAt DateTime @default(now())
+
+  @@index([topic])
 }

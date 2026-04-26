@@ -12,6 +12,7 @@ ssh root@153.75.244.238
 ```
 senha: Dagol7-Bikaz0_Nabyd7-Zadog0=Povuk6
 
+
 Atualize o sistema:
 ```bash
 apt update && apt upgrade -y

@@ -1,3 +1,8 @@
+import prisma from '@/lib/prisma';
+
+// =========================
+// TYPES
+// =========================
 export interface AICard {
   title: string;
   content: string;
@@ -16,11 +21,12 @@ export interface AIStudyPackage {
   cards: AICard[];
   questions: AIQuestion[];
   bonusQuestions: AIQuestion[];
-  metadata?: any; // Armazena a trilha completa, tabuleiro 3D e análise
+  metadata?: any;
 }
 
-import prisma from '@/lib/prisma';
-
+// =========================
+// MAIN
+// =========================
 export const generateStudyContent = async (data: {
   studentName: string,
   subject: string,
@@ -31,6 +37,7 @@ export const generateStudyContent = async (data: {
   previousAnswers?: any[],
   gabarito?: any[]
 }): Promise<AIStudyPackage> => {
+
   let geminiKey = process.env.GEMINI_API_KEY;
   let openaiKey = process.env.OPENAI_API_KEY;
 
@@ -38,100 +45,82 @@ export const generateStudyContent = async (data: {
     const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
     if (config?.geminiApiKey) geminiKey = config.geminiApiKey;
     if (config?.openaiApiKey) openaiKey = config.openaiApiKey;
-  } catch (error) { }
+  } catch { }
 
-  const visualMode = data.visualMode || 'linear';
-  const prompt = `
-    Aja como um sistema educacional avançado, adaptativo e gamificado com suporte a visualização 2D e 3D.
-    PERSONA: "${data.persona}".
-    TEMA: "${data.topic}"
-    IDADE: ${data.gradeLevel} (Alinhado à BNCC)
-    ALUNO: "${data.studentName}"
-    MODO_VISUAL: "${visualMode}"
-    RESPOSTAS_DO_ALUNO: ${JSON.stringify(data.previousAnswers || [])}
-    GABARITO: ${JSON.stringify(data.gabarito || [])}
+  // =========================
+  // CACHE HIT
+  // =========================
+  const cached = await prisma.aICache.findFirst({
+    where: { topic: data.topic },
+    orderBy: { createdAt: 'desc' }
+  }).catch(() => null);
 
-    OBJETIVO:
-    Gerar conteúdo de estudo, avaliação, análise de desempenho, feedback personalizado e trilha de aprendizado.
+  if (cached?.content) {
+    return cached.content as unknown as AIStudyPackage;
+  }
 
-    --- ESTRUTURA JSON OBRIGATÓRIA ---
-    {
-      "conteudo": {
-        "titulo": "string",
-        "explicacao": "Explicação didática, clara e progressiva com exemplos reais e o porquê",
-        "resumo": "string curto e objetivo"
-      },
-      "avaliacao": {
-        "questoes": [
-          { "pergunta": "string", "alternativas": ["A","B","C","D"], "resposta_correta": 0, "dificuldade": "EASY/MEDIUM/HARD", "explicacao": "string" }
-        ],
-        "bonus": [
-          { "pergunta": "string", "resposta_correta_sugerida": "string", "explicacao": "raciocínio" }
-        ]
-      },
-      "analise": { "acertos": 0, "erros": 0, "nivel": "iniciante/intermediario/avancado" },
-      "feedback": { "geral": "string", "erros": [{ "questao": "string", "explicacao": "por que errou", "correcao": "ensino do conceito" }] },
-      "plano_estudo": [{ "topico": "string", "descricao": "string", "objetivo": "string" }],
-      "trilha": {
-        "modo": "${visualMode}",
-        "fases": [
-          {
-            "id": 1, "nome": "string", "descricao": "string", "dificuldade": 1, "status": "disponivel",
-            "posicao": { "x": 0, "y": 0, "z": 0 }, "conexoes": [2], "tipo_visual": "ilha/planeta/castelo", "cor": "#hex",
-            "teste": [{ "pergunta": "string", "alternativas": ["A","B","C","D"], "resposta_correta": 0 }]
-          }
-        ]
-      }
-    }
+  const prompt = buildPrompt(data);
 
-    REGRAS: Retornar APENAS o JSON. 6 questões na avaliação (3 fáceis, 2 médias, 1 difícil). 2 bônus.
-  `;
-
-  // 1. TENTATIVA COM GEMINI
+  // =========================
+  // GEMINI
+  // =========================
   if (geminiKey) {
-    const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
-    for (const modelName of models) {
+    const models = ["gemini-2.0-flash", "gemini-3-flash", "gemini-1.5-flash"];
+
+    for (const model of models) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 35000);
+          const timeout = setTimeout(() => controller.abort(), 30000);
 
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${geminiKey}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            signal: controller.signal,
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.6, response_mime_type: "application/json" }
-            })
-          });
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              signal: controller.signal,
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                  temperature: 0.4,
+                  topP: 0.9,
+                  topK: 40,
+                  response_mime_type: "application/json"
+                }
+              })
+            }
+          );
 
           clearTimeout(timeout);
-          const result = await response.json();
-          if (result.error) {
-            console.error(`Gemini Error (${modelName}):`, result.error);
-            continue;
-          }
+
+          const result = await res.json();
+          if (result.error) throw new Error(result.error.message);
 
           const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!text) throw new Error("Resposta vazia do Gemini");
+          if (!text) throw new Error("Resposta vazia");
 
-          return parseAIResponse(text);
-        } catch (error: any) {
-          console.error(`Falha no Gemini (${modelName}, tentativa ${attempt + 1}):`, error.message);
+          const parsed = parseAIResponse(text);
+
+          await saveCache(data.topic, parsed);
+
+          return parsed;
+
+        } catch (err: any) {
+          console.error(`Gemini erro (${model} tentativa ${attempt + 1}):`, err.message);
         }
       }
     }
   }
 
-  // 2. FALLBACK PARA OPENAI (GPT-4o-mini)
+  // =========================
+  // OPENAI FALLBACK
+  // =========================
   if (openaiKey) {
     try {
-      console.log("Acionando fallback: OpenAI GPT-4o-mini");
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 35000);
+      const timeout = setTimeout(() => controller.abort(), 30000);
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -142,156 +131,292 @@ export const generateStudyContent = async (data: {
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: prompt }],
           response_format: { type: "json_object" },
-          temperature: 0.6
+          temperature: 0.4
         })
       });
 
       clearTimeout(timeout);
-      const result = await response.json();
+
+      const result = await res.json();
       if (result.error) throw new Error(result.error.message);
 
       const text = result?.choices?.[0]?.message?.content;
-      if (!text) throw new Error("Resposta vazia da OpenAI");
+      if (!text) throw new Error("Resposta vazia");
 
-      return parseAIResponse(text);
-    } catch (error: any) {
-      console.error("Falha na OpenAI (Fallback):", error.message);
+      const parsed = parseAIResponse(text);
+
+      await saveCache(data.topic, parsed);
+
+      return parsed;
+
+    } catch (err: any) {
+      console.error("OpenAI erro:", err.message);
     }
   }
 
   return getMockData(data.topic);
 };
 
+// =========================
+// CHAT
+// =========================
 export const chatWithAI = async (params: {
   prompt: string,
-  history?: { role: string, parts: { text: string }[] }[],
+  history?: any[],
   systemInstruction?: string
 }): Promise<string> => {
-  let geminiKey = process.env.GEMINI_API_KEY;
-  let openaiKey = process.env.OPENAI_API_KEY;
+
+  const geminiKey = process.env.GEMINI_API_KEY;
 
   try {
-    const config = await prisma.systemConfig.findUnique({ where: { id: 'global' } });
-    if (config?.geminiApiKey) geminiKey = config.geminiApiKey;
-    if (config?.openaiApiKey) openaiKey = config.openaiApiKey;
-  } catch (error) { }
-
-  const fullHistory = params.history || [];
-  const systemPrompt = params.systemInstruction || "Você é um assistente educativo de elite.";
-
-  // 1. Gemini Try
-  if (geminiKey) {
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
-            { role: "user", parts: [{ text: systemPrompt }] },
-            { role: "model", parts: [{ text: "Entendido. Serei seu assistente educativo de elite. 🚀" }] },
-            ...fullHistory,
+            { role: "user", parts: [{ text: params.systemInstruction || "Assistente educacional." }] },
+            ...(params.history || []),
             { role: "user", parts: [{ text: params.prompt }] }
           ]
         })
-      });
-
-      const result = await response.json();
-      if (!result.error && result.candidates?.[0]?.content?.parts?.[0]?.text) {
-        return result.candidates[0].content.parts[0].text;
       }
-      console.error("Gemini Chat Error:", result.error);
-    } catch (e: any) {
-      console.error("Gemini Chat Exception:", e.message);
-    }
+    );
+
+    const result = await res.json();
+    return result?.candidates?.[0]?.content?.parts?.[0]?.text || "Erro IA";
+
+  } catch {
+    return "Erro de conexão";
   }
-
-  // 2. OpenAI Fallback
-  if (openaiKey) {
-    try {
-      console.log("Chat Fallback: OpenAI GPT-4o-mini");
-      const messages = [
-        { role: "system", content: systemPrompt },
-        ...fullHistory.map(h => ({
-          role: h.role === 'model' ? 'assistant' : 'user',
-          content: h.parts[0].text
-        })),
-        { role: "user", content: params.prompt }
-      ];
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${openaiKey}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages,
-          temperature: 0.7
-        })
-      });
-
-      const result = await response.json();
-      if (result.choices?.[0]?.message?.content) {
-        return result.choices[0].message.content;
-      }
-      console.error("OpenAI Chat Error:", result.error);
-    } catch (e: any) {
-      console.error("OpenAI Chat Exception:", e.message);
-    }
-  }
-
-  return "Desculpe, estou com dificuldades técnicas agora e não consegui processar sua mensagem. Por favor, tente novamente em alguns instantes. 🛠️";
 };
 
-// Função auxiliar para processar o JSON da IA de forma segura
-function parseAIResponse(text: string): AIStudyPackage {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("JSON não encontrado na resposta");
-  const rawContent = JSON.parse(match[0]);
+// =========================
+// PROMPT
+// =========================
+function buildPrompt(data: any): string {
+  return `
+Você é um sistema educacional avançado, especialista em ensino adaptativo, pedagogia moderna e explicação profunda.
 
-  return {
-    summary: rawContent.conteudo?.resumo || "Resumo indisponível",
-    cards: [
-      { 
-        title: rawContent.conteudo?.titulo || "Conteúdo do Estudo", 
-        content: rawContent.conteudo?.explicacao || "Não foi possível carregar a explicação." 
+OBJETIVO:
+Gerar um material de estudo COMPLETO, DETALHADO, DIDÁTICO e PROGRESSIVO para o aluno.
+
+DADOS:
+Aluno: ${data.studentName}
+Matéria: ${data.subject}
+Tema: ${data.topic}
+Nível: ${data.gradeLevel}
+Persona: ${data.persona}
+Modo Visual: ${data.visualMode || 'linear'}
+
+---
+
+DIRETRIZES DE QUALIDADE (OBRIGATÓRIO):
+
+- Explique como se estivesse ensinando alguém que NUNCA viu o assunto
+- Use linguagem clara, progressiva e sem pular etapas
+- Sempre responda:
+  - O que é
+  - Por que isso existe
+  - Como funciona
+  - Onde é aplicado na vida real
+- Use exemplos práticos e reais
+- Use analogias simples quando possível
+- Evite respostas curtas ou superficiais
+- Evite frases genéricas
+- Ensine de forma envolvente
+
+---
+
+CONTEÚDO DEVE TER:
+
+1. Introdução clara ao tema
+2. Explicação detalhada passo a passo
+3. Exemplos práticos
+4. Aplicações reais
+5. Possíveis erros comuns
+6. Dicas para memorizar
+7. Conexões com outros temas
+
+---
+
+AVALIAÇÃO:
+
+- 6 questões obrigatórias:
+  - 3 fáceis (conceito básico)
+  - 2 médias (interpretação)
+  - 1 difícil (raciocínio)
+- 2 questões bônus (desafio/reflexão)
+
+Cada questão deve ter:
+- Enunciado claro
+- 4 alternativas plausíveis
+- Apenas 1 correta
+- Explicação detalhada da resposta
+
+---
+
+FORMATO JSON OBRIGATÓRIO:
+
+{
+  "conteudo": {
+    "titulo": "string",
+    "explicacao": "explicação EXTREMAMENTE detalhada e didática",
+    "resumo": "resumo claro e objetivo"
+  },
+  "avaliacao": {
+    "questoes": [
+      {
+        "pergunta": "string",
+        "alternativas": ["A","B","C","D"],
+        "resposta_correta": 0,
+        "dificuldade": "EASY|MEDIUM|HARD",
+        "explicacao": "explicação completa da resposta"
       }
     ],
-    questions: (rawContent.avaliacao?.questoes || []).map((q: any) => ({
-      text: q.pergunta,
-      options: q.alternativas,
-      correctIndex: q.resposta_correta,
-      difficulty: q.dificuldade || 'MEDIUM',
-      explanation: q.explicacao
-    })),
-    bonusQuestions: (rawContent.avaliacao?.bonus || []).map((b: any) => ({
-      text: b.pergunta,
-      options: ["Entendi!", "Interessante", "Mais ou menos", "Fácil!"],
-      correctIndex: 0,
-      difficulty: 'BONUS',
-      explanation: b.explicacao
-    })),
-    metadata: rawContent
-  };
+    "bonus": [
+      {
+        "pergunta": "string",
+        "resposta_correta_sugerida": "string",
+        "explicacao": "explicação do raciocínio"
+      }
+    ]
+  },
+  "analise": {
+    "acertos": 0,
+    "erros": 0,
+    "nivel": "iniciante|intermediario|avancado"
+  },
+  "feedback": {
+    "geral": "feedback motivador e explicativo",
+    "erros": []
+  },
+  "plano_estudo": [
+    {
+      "topico": "string",
+      "descricao": "o que estudar",
+      "objetivo": "por que estudar isso"
+    }
+  ],
+  "trilha": {
+    "modo": "${data.visualMode || 'linear'}",
+    "fases": []
+  }
 }
 
+---
 
+REGRAS FINAIS (CRÍTICO):
 
+- NÃO escrever nada fora do JSON
+- NÃO usar markdown
+- NÃO resumir demais
+- NÃO simplificar demais
+- GERAR CONTEÚDO RICO, PROFUNDO E ENSINÁVEL
+- GARANTIR QUE O ALUNO CONSIGA APRENDER SÓ COM ESSE MATERIAL
+`;
+}
+
+// =========================
+// PARSER
+// =========================
+function parseAIResponse(text: string): AIStudyPackage {
+  try {
+    const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+
+    if (start === -1 || end === -1) throw new Error("JSON inválido");
+
+    const json = JSON.parse(cleaned.substring(start, end + 1));
+
+    if (!json.conteudo || !json.avaliacao) {
+      throw new Error("Estrutura inválida");
+    }
+
+    if ((json.avaliacao.questoes || []).length < 6) {
+      throw new Error("Menos de 6 questões");
+    }
+
+    return {
+      summary: json.conteudo.resumo || "",
+      cards: [{
+        title: json.conteudo.titulo || "",
+        content: json.conteudo.explicacao || ""
+      }],
+      questions: json.avaliacao.questoes.map((q: any) => ({
+        text: q.pergunta || "",
+        options: q.alternativas || [],
+        correctIndex: Number(q.resposta_correta) || 0,
+        difficulty: normalizeDifficulty(q.dificuldade),
+        explanation: q.explicacao || ""
+      })),
+      bonusQuestions: (json.avaliacao.bonus || []).map((b: any) => ({
+        text: b.pergunta || "",
+        options: ["Ok", "Entendi", "Quase", "Fácil"],
+        correctIndex: 0,
+        difficulty: "BONUS",
+        explanation: b.explicacao || ""
+      })),
+      metadata: json
+    };
+
+  } catch (err) {
+    console.error("Parse erro:", err);
+    throw err;
+  }
+}
+
+// =========================
+// CACHE
+// =========================
+async function saveCache(topic: string, data: AIStudyPackage) {
+  try {
+    await prisma.aICache.create({
+      data: {
+        topic,
+        content: data as any
+      }
+    });
+  } catch (e) {
+    console.error("Erro ao salvar cache:", e);
+  }
+}
+
+// =========================
+// NORMALIZER
+// =========================
+function normalizeDifficulty(level: string): 'EASY' | 'MEDIUM' | 'HARD' | 'BONUS' {
+  const map: any = {
+    easy: 'EASY',
+    medio: 'MEDIUM',
+    medium: 'MEDIUM',
+    hard: 'HARD',
+    dificil: 'HARD'
+  };
+  return map[(level || '').toLowerCase()] || 'MEDIUM';
+}
+
+// =========================
+// MOCK
+// =========================
 function getMockData(topic: string): AIStudyPackage {
   return {
-    summary: `Esta é uma síntese automática de exemplo sobre ${topic}. No conteúdo real gerado pela IA, você verá aqui uma explicação pedagógica completa e motivadora sobre o tema.`,
+    summary: `Resumo sobre ${topic}`,
     cards: [
-      { title: `Introdução a ${topic}`, content: "Este é um conteúdo de exemplo gerado pelo sistema porque a API do Gemini não está configurada ou a chamada falhou." },
-      { title: "Ponto importante", content: "Certifique-se de que a GEMINI_API_KEY está correta nas variáveis de ambiente (.env) ou no painel Admin." }
+      { title: topic, content: "Mock fallback" }
     ],
-    questions: [
-      { text: `Qual o conceito principal de ${topic}?`, options: ["Opção A", "Opção B", "Opção C", "Opção D"], correctIndex: 0, difficulty: 'EASY', explanation: "A explicação detalhada apareceria aqui." },
-      { text: "Pergunta de nível médio?", options: ["A", "B", "C", "D"], correctIndex: 1, difficulty: 'MEDIUM', explanation: "Explicação da média." },
-      { text: "Desafio difícil!", options: ["1", "2", "3", "4"], correctIndex: 2, difficulty: 'HARD', explanation: "Explicação da difícil." }
-    ],
+    questions: Array.from({ length: 6 }).map((_, i) => ({
+      text: `Pergunta ${i + 1}`,
+      options: ["A", "B", "C", "D"],
+      correctIndex: 0,
+      difficulty: i < 3 ? 'EASY' : i < 5 ? 'MEDIUM' : 'HARD',
+      explanation: ""
+    })),
     bonusQuestions: [
-      { text: "Desafio Bônus Final!", options: ["Sim", "Não"], correctIndex: 0, difficulty: 'BONUS', explanation: "Parabéns por chegar até aqui!" }
+      { text: "Bônus", options: ["Ok"], correctIndex: 0, difficulty: 'BONUS', explanation: "" }
     ]
   };
 }
