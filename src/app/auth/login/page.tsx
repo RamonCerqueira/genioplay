@@ -54,7 +54,7 @@ export default function LoginPage() {
           <img
             src="/icons/icon-512x512.png"
             alt="GênioPlay Logo"
-            className="w-20 h-20 object-contain rounded-[2rem] shadow-2xl shadow-blue-500/40 group-hover:scale-110 transition-transform duration-500"
+            className="w-20 h-20 object-contain rounded-[1.8rem] overflow-hidden bg-blue-600 shadow-2xl shadow-blue-500/40 group-hover:scale-110 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full -z-10 group-hover:bg-blue-500/30 transition-colors" />
         </div>

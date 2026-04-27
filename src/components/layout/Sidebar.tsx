@@ -31,13 +31,16 @@ export default function Sidebar({
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
 
-  const menuItems = role === 'ADMIN' ? [
+  // Fallback de segurança: Se o role não vier, assume GUARDIAN para evitar menu vazio
+  const currentRole = role || 'GUARDIAN';
+
+  const menuItems = currentRole === 'ADMIN' ? [
     { icon: LayoutDashboard, label: 'Painel Master', href: '/admin-master' },
     { icon: Users, label: 'Usuários', href: '/admin-master?tab=users' },
     { icon: MessageSquare, label: 'Suporte', href: '/admin-master?tab=support' },
     { icon: CreditCard, label: 'Financeiro', href: '/admin-master?tab=finance' },
     { icon: Settings, label: 'Configurações', href: '/admin-master?tab=settings' },
-  ] : role === 'GUARDIAN' ? [
+  ] : currentRole === 'GUARDIAN' ? [
     { icon: LayoutDashboard, label: 'Resumo', href: '/dashboard' },
     { icon: Users, label: 'Família', href: '/dashboard/family' },
     { icon: TrendingUp, label: 'Relatórios', href: '/dashboard/reports' },
@@ -53,7 +56,7 @@ export default function Sidebar({
   return (
     <motion.aside
       animate={{ width: isCollapsed ? 100 : 300 }}
-      className="hidden md:flex flex-col h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 z-50 p-6 transition-all duration-500 ease-in-out"
+      className="hidden md:flex flex-col h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 z-[100] p-6 transition-all duration-500 ease-in-out shadow-[10px_0_30px_rgba(0,0,0,0.05)]"
     >
       {/* Decorative Blur */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
@@ -72,7 +75,7 @@ export default function Sidebar({
           <img 
             src="/icons/icon-512x512.png" 
             alt="Logo" 
-            className={`${isCollapsed ? "w-12 h-12" : "w-10 h-10"} object-contain rounded-2xl shadow-xl shadow-blue-500/10 group-hover:scale-110 transition-transform duration-500`} 
+            className={`${isCollapsed ? "w-12 h-12" : "w-10 h-10"} object-contain rounded-[1.2rem] overflow-hidden bg-blue-600 shadow-xl shadow-blue-500/20 group-hover:scale-110 transition-transform duration-500`} 
           />
           <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full -z-10" />
         </div>
@@ -93,7 +96,7 @@ export default function Sidebar({
           const isActive = pathname === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-4 px-4'} py-3.5 rounded-2xl transition-all duration-300 relative group ${isActive ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+              <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-4 px-4'} py-3.5 rounded-2xl transition-all duration-300 relative group ${isActive ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white'
                 }`}>
                 {isActive && (
                   <motion.div
