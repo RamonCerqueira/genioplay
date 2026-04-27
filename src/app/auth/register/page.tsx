@@ -156,10 +156,10 @@ function RegisterForm() {
         <span className="text-3xl font-black tracking-tighter text-white uppercase">Gênio<span className="text-blue-500">Play</span></span>
       </Link>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ 
-          opacity: 1, 
+        animate={{
+          opacity: 1,
           y: [0, -10, 0],
         }}
         transition={{
@@ -398,7 +398,7 @@ function RegisterForm() {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

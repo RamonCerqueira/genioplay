@@ -3,7 +3,8 @@
 Este guia foi otimizado para VPS com recursos limitados (2GB RAM). Rodaremos o App direto no Linux e apenas o Redis no Docker.
 
 ---
-
+ telefone contato
+ 71981270742
 ## 1. Acesso Inicial e Preparação
 
 Acesse sua VPS via terminal:
