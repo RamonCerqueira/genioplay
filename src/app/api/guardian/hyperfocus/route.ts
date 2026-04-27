@@ -36,12 +36,12 @@ export async function POST(request: Request) {
     });
 
     // 3. Enviar Notificação Especial
-    await sendNotification(
-      studentId,
-      "⚡ NOVO DESAFIO DISPONÍVEL!",
-      "Seu responsável enviou um Desafio Relâmpago! Você tem 1 hora para iniciar e ganhar XP em DOBRO por 15 minutos!",
-      "FOCUS_ALERT"
-    );
+    await sendNotification({
+      userId: studentId,
+      title: "⚡ NOVO DESAFIO DISPONÍVEL!",
+      message: "Seu responsável enviou um Desafio Relâmpago! Você tem 1 hora para iniciar e ganhar XP em DOBRO por 15 minutos!",
+      type: "FOCUS_ALERT"
+    });
 
     return NextResponse.json({ success: true, hyperfocusAvailableUntil });
   } catch (error) {
