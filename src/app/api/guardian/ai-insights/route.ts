@@ -10,10 +10,14 @@ export async function GET() {
 
   try {
     const children = await prisma.user.findMany({
-      where: { guardianId: session.user.id },
+      where: { 
+        studentIn: { 
+          some: { guardianId: session.user.id } 
+        } 
+      },
       include: {
-        skills: true,
-        lessons: {
+        skillLevels: true,
+        generatedLessons: {
           take: 5,
           orderBy: { createdAt: 'desc' },
           include: { topic: { include: { subject: true } } }
@@ -23,10 +27,10 @@ export async function GET() {
 
     // Mock de Insights baseados em dados reais (Em prod isso seria processado por uma LLM)
     const insights = children.map(child => {
-      const topSkill = child.skills.sort((a, b) => b.elo - a.elo)[0];
-      const lowSkill = child.skills.sort((a, b) => a.elo - b.elo)[0];
-      const recentAvg = child.lessons.length > 0 
-        ? child.lessons.reduce((acc, l) => acc + l.score, 0) / child.lessons.length 
+      const topSkill = child.skillLevels.sort((a, b) => b.elo - a.elo)[0];
+      const lowSkill = child.skillLevels.sort((a, b) => a.elo - b.elo)[0];
+      const recentAvg = child.generatedLessons.length > 0 
+        ? child.generatedLessons.reduce((acc, l) => acc + (l.score || 0), 0) / child.generatedLessons.length 
         : 0;
 
       let message = '';
