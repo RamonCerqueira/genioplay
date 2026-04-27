@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { login } from '@/lib/auth';
 import crypto from 'crypto';
+import { handleApiError } from '@/lib/api-error';
 
 export async function POST(request: Request) {
   try {
@@ -40,6 +41,6 @@ export async function POST(request: Request) {
       } 
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return handleApiError(error);
   }
 }

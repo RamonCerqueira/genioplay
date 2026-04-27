@@ -158,17 +158,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, user: { id: user.id, username: user.username, role: user.role } });
   } catch (error: any) {
-    console.error('Registration error:', error);
-    
-    // Mensagem amigável para o usuário
-    let friendlyMessage = 'Ocorreu um erro inesperado. Por favor, tente novamente em alguns instantes.';
-    
-    if (error.code === 'P2002') {
-      friendlyMessage = 'Este e-mail ou nome de usuário já está sendo utilizado.';
-    } else if (error.message.includes('Can\'t reach database')) {
-      friendlyMessage = 'Estamos com uma instabilidade momentânea na conexão. Tente novamente em 1 minuto.';
-    }
-
-    return NextResponse.json({ success: false, error: friendlyMessage }, { status: 400 });
+    return handleApiError(error);
   }
 }

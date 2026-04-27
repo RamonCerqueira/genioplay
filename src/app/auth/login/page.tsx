@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GraduationCap, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { SpaceBackground } from '@/components/ui/SpaceBackground';
 
 export default function LoginPage() {
@@ -60,7 +61,18 @@ export default function LoginPage() {
         <span className="text-4xl font-black tracking-tighter text-white uppercase">Gênio<span className="text-blue-500">Play</span></span>
       </Link>
 
-      <div className="w-full max-w-md space-y-8 premium-card p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] relative overflow-hidden z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{
+          opacity: 1,
+          y: [0, -10, 0],
+        }}
+        transition={{
+          y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+          opacity: { duration: 0.5 }
+        }}
+        className="w-full max-w-md space-y-8 premium-card p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border-white/20 shadow-[0_0_80px_rgba(37,99,235,0.15)] relative overflow-hidden z-10"
+      >
         <div className="text-center relative z-10">
           <h2 className="text-4xl font-black text-slate-800 dark:text-white">Bem-vindo</h2>
           <p className="text-slate-500 dark:text-slate-400 font-bold mt-2 text-sm italic">"O sucesso do seu filho começa aqui."</p>
@@ -125,7 +137,8 @@ export default function LoginPage() {
         <div className="text-center text-sm font-bold text-slate-500 pt-4">
           Não tem uma conta? <Link href="/auth/register" className="text-blue-600 hover:underline font-black">Crie agora</Link>
         </div>
-      </div>
+      </motion.div>
+
     </div>
   );
 }

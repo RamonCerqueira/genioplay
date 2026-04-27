@@ -156,8 +156,19 @@ function RegisterForm() {
         <span className="text-3xl font-black tracking-tighter text-white uppercase">Gênio<span className="text-blue-500">Play</span></span>
       </Link>
 
-      <div className="w-full max-w-xl relative z-10">
-        <div className="premium-card p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] relative overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ 
+          opacity: 1, 
+          y: [0, -10, 0],
+        }}
+        transition={{
+          y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+          opacity: { duration: 0.5 }
+        }}
+        className="w-full max-w-xl relative z-10"
+      >
+        <div className="premium-card p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border-white/20 shadow-[0_0_80px_rgba(37,99,235,0.15)] relative overflow-hidden">
           {/* Progress Bar */}
           {formData.role === 'GUARDIAN' && (
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-100">

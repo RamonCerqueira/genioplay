@@ -29,7 +29,7 @@ export function SpaceBackground() {
       />
 
       {/* Camada 1: Estrelas Lentas (Fundo) */}
-      {[...Array(40)].map((_, i) => (
+      {[...Array(60)].map((_, i) => (
         <motion.div
           key={`star-l-${i}`}
           initial={{ 
@@ -38,20 +38,20 @@ export function SpaceBackground() {
             opacity: Math.random() 
           }}
           animate={{ 
-            y: ['0%', '100%'],
-            opacity: [0.2, 0.7, 0.2]
+            y: ['-10%', '110%'],
+            opacity: [0.3, 0.8, 0.3]
           }}
           transition={{ 
-            duration: 50 + Math.random() * 50, 
+            duration: 40 + Math.random() * 60, 
             repeat: Infinity, 
             ease: "linear" 
           }}
-          className="absolute w-[1px] h-[1px] bg-white rounded-full"
+          className="absolute w-[2px] h-[2px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"
         />
       ))}
 
       {/* Camada 2: Estrelas Médias (Meio) */}
-      {[...Array(30)].map((_, i) => (
+      {[...Array(40)].map((_, i) => (
         <motion.div
           key={`star-m-${i}`}
           initial={{ 
@@ -60,16 +60,16 @@ export function SpaceBackground() {
             opacity: Math.random() 
           }}
           animate={{ 
-            y: ['0%', '100%'],
-            opacity: [0.4, 1, 0.4],
-            scale: [1, 1.5, 1]
+            y: ['-10%', '110%'],
+            opacity: [0.5, 1, 0.5],
+            scale: [1, 1.8, 1]
           }}
           transition={{ 
-            duration: 30 + Math.random() * 20, 
+            duration: 20 + Math.random() * 20, 
             repeat: Infinity, 
             ease: "linear" 
           }}
-          className="absolute w-[2px] h-[2px] bg-blue-200 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.5)]"
+          className="absolute w-[3px] h-[3px] bg-blue-300 rounded-full shadow-[0_0_12px_rgba(59,130,246,0.9)]"
         />
       ))}
 
