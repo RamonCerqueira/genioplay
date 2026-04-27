@@ -11,6 +11,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotify } from '@/components/ui/NotificationSystem';
 
+import { CreditCardForm } from '@/components/payment/CreditCardForm';
+
 export default function SettingsPage() {
   const notify = useNotify();
   const [activeTab, setActiveTab] = useState<'profile' | 'rewards' | 'billing' | 'notifications'>('profile');
@@ -19,7 +21,16 @@ export default function SettingsPage() {
   const [rewardCategory, setRewardCategory] = useState('Todos');
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailWeekly: true,
+    emailInstant: false,
+    whatsappAlerts: true,
+    pushBadge: true,
+    pushFocus: true
+  });
 
   const [profile, setProfile] = useState({
     username: '',
@@ -463,7 +474,12 @@ export default function SettingsPage() {
                             <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Exp: 12/28</p>
                          </div>
                       </div>
-                      <button className="text-sm font-black text-blue-600 hover:underline">Alterar Cartão</button>
+                      <button 
+                        onClick={() => setIsCardModalOpen(true)}
+                        className="text-sm font-black text-blue-600 hover:underline"
+                      >
+                        Alterar Cartão
+                      </button>
                    </div>
                 </div>
              </div>
@@ -476,6 +492,81 @@ export default function SettingsPage() {
                      <button className="w-full py-4 bg-white text-blue-600 font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Quero o Plano Anual</button>
                    </div>
                    <Zap className="absolute -right-8 -bottom-8 text-white/10 group-hover:scale-110 transition-transform" size={180} />
+                </div>
+             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'notifications' && (
+          <motion.div 
+            key="notifications"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="max-w-3xl mx-auto space-y-8"
+          >
+             <div className="premium-card p-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl space-y-10">
+                <div className="flex items-center gap-4 border-b border-slate-50 dark:border-slate-800 pb-8">
+                   <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600">
+                      <Bell size={28} />
+                   </div>
+                   <div>
+                      <h3 className="text-2xl font-black text-slate-800 dark:text-white">Central de Notificações</h3>
+                      <p className="text-slate-500 font-bold">Escolha como e quando quer ser avisado.</p>
+                   </div>
+                </div>
+
+                <div className="space-y-8">
+                   <div className="space-y-6">
+                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Mail size={14} /> E-mail</h4>
+                      <div className="space-y-4">
+                         {[
+                           { id: 'emailWeekly', label: 'Relatórios Semanais de Desempenho', desc: 'Um resumo épico de tudo que seu filho aprendeu na semana.' },
+                           { id: 'emailInstant', label: 'Alertas de Conclusão de Lição', desc: 'Receba um e-mail toda vez que um novo emblema for conquistado.' }
+                         ].map(item => (
+                           <label key={item.id} className="flex items-start justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-all cursor-pointer group">
+                              <div className="space-y-1">
+                                 <p className="font-black text-slate-700 dark:text-slate-200">{item.label}</p>
+                                 <p className="text-xs text-slate-400 font-bold">{item.desc}</p>
+                              </div>
+                              <input 
+                                type="checkbox" 
+                                checked={(notificationSettings as any)[item.id]} 
+                                onChange={() => setNotificationSettings({...notificationSettings, [item.id]: !(notificationSettings as any)[item.id]})}
+                                className="w-6 h-6 rounded-lg border-slate-200 text-blue-600 focus:ring-blue-500"
+                              />
+                           </label>
+                         ))}
+                      </div>
+                   </div>
+
+                   <div className="space-y-6 pt-8 border-t border-slate-50 dark:border-slate-800">
+                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Smartphone size={14} /> WhatsApp & Push</h4>
+                      <div className="space-y-4">
+                         {[
+                           { id: 'whatsappAlerts', label: 'Alertas via WhatsApp', desc: 'Notificações importantes diretamente no seu celular.' },
+                           { id: 'pushBadge', label: 'Novas Conquistas do Filho', desc: 'Push notification quando um selo raro for desbloqueado.' },
+                           { id: 'pushFocus', label: 'Alertas de Foco (Anti-Cheat)', desc: 'Saiba imediatamente se o aluno sair da aba de estudos.' }
+                         ].map(item => (
+                           <label key={item.id} className="flex items-start justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-all cursor-pointer group">
+                              <div className="space-y-1">
+                                 <p className="font-black text-slate-700 dark:text-slate-200">{item.label}</p>
+                                 <p className="text-xs text-slate-400 font-bold">{item.desc}</p>
+                              </div>
+                              <input 
+                                type="checkbox" 
+                                checked={(notificationSettings as any)[item.id]} 
+                                onChange={() => setNotificationSettings({...notificationSettings, [item.id]: !(notificationSettings as any)[item.id]})}
+                                className="w-6 h-6 rounded-lg border-slate-200 text-blue-600 focus:ring-blue-500"
+                              />
+                           </label>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+
+                <div className="pt-8 border-t border-slate-50 dark:border-slate-800 flex justify-end">
+                   <button className="btn-primary px-12 py-4 shadow-xl shadow-blue-500/10">Salvar Preferências</button>
                 </div>
              </div>
           </motion.div>
@@ -554,6 +645,34 @@ export default function SettingsPage() {
                      {submitting ? <Loader2 className="animate-spin mx-auto" /> : 'Atualizar Senha'}
                   </button>
                </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Cartão de Crédito */}
+      <AnimatePresence>
+        {isCardModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCardModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3rem] p-12 shadow-3xl relative z-[101] overflow-y-auto max-h-[90vh] scrollbar-hide">
+               <div className="flex justify-between items-center mb-10">
+                  <div>
+                    <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tighter">Cartão de Crédito</h2>
+                    <p className="text-slate-400 font-bold text-sm">Dados protegidos por criptografia de ponta.</p>
+                  </div>
+                  <button onClick={() => setIsCardModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                     <X size={24} className="text-slate-400" />
+                  </button>
+               </div>
+               
+               <CreditCardForm 
+                 onCancel={() => setIsCardModalOpen(false)} 
+                 onSuccess={(data) => {
+                   setIsCardModalOpen(false);
+                   notify({ title: 'Cartão Atualizado!', message: `O cartão terminado em ${data.number.slice(-4)} foi salvo.`, type: 'SUCCESS' });
+                 }} 
+               />
             </motion.div>
           </div>
         )}

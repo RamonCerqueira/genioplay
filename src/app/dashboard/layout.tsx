@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileNav from "@/components/layout/MobileNav";
+import { DashboardHeader } from "@/components/layout/DashboardHeader";
 
 export default async function DashboardLayout({
   children,
@@ -25,7 +26,8 @@ export default async function DashboardLayout({
       
       {/* Área de Conteúdo com Respiro */}
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 p-6 pb-32 md:pb-10 md:p-10 lg:p-16 transition-all duration-500">
+        <DashboardHeader />
+        <main className="flex-1 p-6 pb-32 md:pb-10 md:p-10 lg:p-16 pt-0 lg:pt-0 transition-all duration-500">
           <div className="max-w-[1800px] mx-auto">
             {children}
           </div>

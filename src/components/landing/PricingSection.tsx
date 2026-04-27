@@ -1,12 +1,48 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, ShieldCheck, Zap, Sparkles, HelpCircle } from 'lucide-react';
+import { Check, ShieldCheck, Zap, Sparkles, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link'
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleSubscribe = async () => {
+    if (!session) {
+      router.push('/auth/register?callbackUrl=/pricing');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/payment/mercado-pago', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: billingCycle === 'monthly' ? 'premium_monthly' : 'premium_yearly',
+          price: billingCycle === 'monthly' ? 49.90 : 478.80,
+          description: `Assinatura GênioPlay Premium - Plano ${billingCycle === 'monthly' ? 'Mensal' : 'Anual'}`
+        })
+      });
+
+      const data = await res.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert(data.error || 'Erro ao processar pagamento.');
+      }
+    } catch (err) {
+      alert('Erro de conexão.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section id="precos" className="py-40 bg-slate-50 dark:bg-slate-900/50">
@@ -59,11 +95,11 @@ export default function PricingSection() {
 
             <ul className="space-y-5 mb-12 flex-1">
               {[
-                "1 Filho conectado",
-                "Pomodoro Educativo Básico",
+                "Até 1 Filho conectado",
+                "Pomodoro Educativo",
                 "Gestão de Recompensas",
-                "3 Quizzes por dia",
-                "Métricas Simples de Estudo"
+                "Quizzes Diários",
+                "Métricas de Estudo"
               ].map(f => (
                 <li key={f} className="flex items-start gap-3 text-slate-500 dark:text-slate-400 font-bold text-sm">
                   <Check className="text-emerald-500 shrink-0" size={18} /> {f}
@@ -71,7 +107,10 @@ export default function PricingSection() {
               ))}
             </ul>
 
-            <button className="w-full py-5 rounded-[1.5rem] border-2 border-slate-100 dark:border-slate-700 font-black text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-lg">
+            <button 
+              onClick={() => router.push('/auth/register')}
+              className="w-full py-5 rounded-[1.5rem] border-2 border-slate-100 dark:border-slate-700 font-black text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-lg"
+            >
               Começar Agora
             </button>
           </motion.div>
@@ -110,7 +149,9 @@ export default function PricingSection() {
             <ul className="space-y-5 mb-12 flex-1">
               {[
                 "Filhos Ilimitados",
-                "Tutor de IA (Gemini 1.5) Ilimitado",
+                "Meta Épica (Puzzle 3D Interativo)",
+                "Mentor IA para Pais (Proativo)",
+                "Tutor de IA Ilimitado",
                 "Anti-Cheat via WebSockets 360°",
                 "Relatórios de Performance em PDF",
                 "Suporte Prioritário 24/7",
@@ -122,10 +163,18 @@ export default function PricingSection() {
               ))}
             </ul>
 
-            <button className="group relative bg-blue-600 hover:bg-blue-700 text-white font-black py-5 px-8 rounded-[1.5rem] transition-all duration-300 shadow-xl shadow-blue-500/40 active:scale-95 flex items-center justify-center gap-3 w-full text-xl overflow-hidden">
+            <button 
+              onClick={handleSubscribe}
+              disabled={loading}
+              className="group relative bg-blue-600 hover:bg-blue-700 text-white font-black py-5 px-8 rounded-[1.5rem] transition-all duration-300 shadow-xl shadow-blue-500/40 active:scale-95 flex items-center justify-center gap-3 w-full text-xl overflow-hidden"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              Assinar Premium
-              <Zap size={20} fill="currentColor" />
+              {loading ? <Loader2 className="animate-spin" size={24} /> : (
+                <>
+                  Assinar Premium
+                  <Zap size={20} fill="currentColor" />
+                </>
+              )}
             </button>
 
             <p className="text-center mt-6 text-[10px] font-bold text-slate-400 flex items-center justify-center gap-2">

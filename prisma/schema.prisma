@@ -75,6 +75,16 @@ model User {
   redemptions      Redemption[]      @relation("StudentRedemptions")
   supportTickets   SupportTicket[]
   supportMessages  SupportMessage[]
+
+  pedagogicalInsights PedagogicalInsight[]
+  studentBadges      StudentBadge[]
+  notifications      Notification[]
+  
+  epicGoals          EpicGoal[] @relation("StudentEpicGoals")
+  managedEpicGoals   EpicGoal[] @relation("GuardianEpicGoals")
+
+  hyperfocusAvailableUntil DateTime? // Janela de 60min para o aluno INICIAR o desafio
+  hyperfocusActiveUntil    DateTime? // Duração de 15min do benefício após iniciado
 }
 
 model FamilyMember {
@@ -134,6 +144,8 @@ model GeneratedLesson {
   topic       Topic     @relation(fields: [topicId], references: [id])
   guardianId  String
   completed   Boolean   @default(false)
+  score       Int?      // Pontuação da lição (0-100)
+  coinsEarned Int?      // Total de moedas ganhas
   completedAt DateTime?
   createdAt   DateTime  @default(now())
 }
@@ -300,4 +312,61 @@ model AICache {
   createdAt DateTime @default(now())
 
   @@index([topic])
+}
+model Badge {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String
+  icon        String
+  category    String // "STUDY", "FOCUS", "STREAK", "SOCIAL"
+  students    StudentBadge[]
+}
+
+model StudentBadge {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt  DateTime @default(now())
+
+  @@unique([studentId, badgeId])
+}
+
+model PedagogicalInsight {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  guardianId String
+  text      String
+  category  String // "STRENGTH", "WEAKNESS", "SUGGESTION"
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String // "MISSION_COMPLETE", "FOCUS_ALERT", "BADGE_EARNED", "PAYMENT"
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model EpicGoal {
+  id               String    @id @default(cuid())
+  studentId        String
+  guardianId       String
+  title            String    @default("Passar de ano sem recuperação")
+  prize            String // O prêmio definido pelo pai
+  targetLessons    Int       @default(100) // Quantidade de lições para completar a meta
+  currentLessons   Int       @default(0)
+  status           String    @default("ACTIVE") // ACTIVE, ACHIEVED, FAILED
+  imageUrl         String?   // Imagem do prêmio (Mosaico)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  student  User @relation("StudentEpicGoals", fields: [studentId], references: [id])
+  guardian User @relation("GuardianEpicGoals", fields: [guardianId], references: [id])
 }

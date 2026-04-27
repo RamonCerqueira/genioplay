@@ -3,9 +3,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { BrainCircuit, Mail, Lock, ShieldCheck, ArrowRight, Loader2, HeartHandshake, User, GraduationCap, Phone, Fingerprint, MapPin, Search, CheckCircle2, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { BrainCircuit, Mail, Lock, ShieldCheck, ArrowRight, Loader2, HeartHandshake, User, GraduationCap, Phone, Fingerprint, MapPin, Search, CheckCircle2, AlertTriangle, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { validateCPF, formatCPF } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { SpaceBackground } from '@/components/ui/SpaceBackground';
 
 function RegisterForm() {
   const searchParams = useSearchParams();
@@ -100,10 +101,10 @@ function RegisterForm() {
     if (isPhoneTaken) { setError('Este telefone já está cadastrado.'); return; }
 
     if (step === 3 || formData.role === 'STUDENT') {
-       if (formData.password !== confirmPassword) {
-         setError('As senhas não coincidem.');
-         return;
-       }
+      if (formData.password !== confirmPassword) {
+        setError('As senhas não coincidem.');
+        return;
+      }
     }
 
     if (step === 1 && formData.role === 'GUARDIAN' && !validateCPF(formData.cpf)) {
@@ -140,21 +141,23 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-100/50 rounded-full blur-3xl" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-orange-100/50 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-[#020617]">
+      <SpaceBackground />
 
-      <Link href="/" className="mb-8 flex items-center gap-3 group relative z-10">
-        <div className="bg-blue-600 p-2.5 rounded-[1.2rem] group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/20 text-white">
-          <GraduationCap size={28} />
+      <Link href="/" className="mb-10 flex flex-col items-center gap-4 group relative z-10">
+        <div className="relative">
+          <img
+            src="/icons/icon-512x512.png"
+            alt="GênioPlay Logo"
+            className="w-16 h-16 object-contain rounded-[1.5rem] shadow-2xl shadow-blue-500/40 group-hover:scale-110 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full -z-10 group-hover:bg-blue-500/30 transition-colors" />
         </div>
-        <span className="text-3xl font-black tracking-tighter text-slate-800">Gênio<span className="text-blue-600">Play</span></span>
+        <span className="text-3xl font-black tracking-tighter text-white uppercase">Gênio<span className="text-blue-500">Play</span></span>
       </Link>
 
       <div className="w-full max-w-xl relative z-10">
-        <div className="premium-card p-10 bg-white border-slate-100 shadow-2xl relative overflow-hidden">
+        <div className="premium-card p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] relative overflow-hidden">
           {/* Progress Bar */}
           {formData.role === 'GUARDIAN' && (
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-100">
@@ -192,17 +195,17 @@ function RegisterForm() {
                 <div className="space-y-2">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">E-mail</label>
                   <div className="relative">
-                    <input 
-                      type="email" 
-                      className={`input-field pl-12 ${isEmailTaken ? 'border-red-500 bg-red-50 text-red-600' : ''}`} 
-                      placeholder="seu@email.com" 
-                      value={formData.email} 
-                      onChange={e => setFormData({ ...formData, email: e.target.value })} 
-                      required 
+                    <input
+                      type="email"
+                      className={`input-field pl-12 ${isEmailTaken ? 'border-red-500 bg-red-50 text-red-600' : ''}`}
+                      placeholder="seu@email.com"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      required
                     />
                     <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 ${isEmailTaken ? 'text-red-500' : 'text-slate-400'}`} size={20} />
                     {isEmailTaken && (
-                       <AlertTriangle className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 animate-pulse" size={18} />
+                      <AlertTriangle className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 animate-pulse" size={18} />
                     )}
                   </div>
                   {isEmailTaken && <p className="text-[10px] text-red-500 font-black uppercase tracking-widest ml-1">E-mail já cadastrado</p>}
@@ -228,7 +231,7 @@ function RegisterForm() {
                         )}
                       </div>
                       {isCpfTaken ? (
-                         <p className="text-[10px] text-red-500 font-black uppercase tracking-widest ml-1">CPF já cadastrado</p>
+                        <p className="text-[10px] text-red-500 font-black uppercase tracking-widest ml-1">CPF já cadastrado</p>
                       ) : formData.cpf.length === 14 && !validateCPF(formData.cpf) && (
                         <p className="text-[10px] text-red-500 font-black uppercase tracking-widest ml-1">CPF Inválido</p>
                       )}
@@ -236,13 +239,13 @@ function RegisterForm() {
                     <div className="space-y-2">
                       <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp</label>
                       <div className="relative">
-                        <input 
-                          type="text" 
-                          className={`input-field pl-12 ${isPhoneTaken ? 'border-red-500 bg-red-50 text-red-600' : ''}`} 
-                          placeholder="(11) 99999-9999" 
-                          value={formData.phone} 
-                          onChange={e => setFormData({ ...formData, phone: e.target.value })} 
-                          required 
+                        <input
+                          type="text"
+                          className={`input-field pl-12 ${isPhoneTaken ? 'border-red-500 bg-red-50 text-red-600' : ''}`}
+                          placeholder="(11) 99999-9999"
+                          value={formData.phone}
+                          onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                          required
                         />
                         <Phone className={`absolute left-4 top-1/2 -translate-y-1/2 ${isPhoneTaken ? 'text-red-500' : 'text-slate-400'}`} size={20} />
                         {isPhoneTaken && (
@@ -255,6 +258,24 @@ function RegisterForm() {
                     </div>
                   </div>
                 )}
+
+                <div className="space-y-2 pt-4 border-t border-slate-50">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <HeartHandshake size={14} className="text-pink-500" /> Código de Indicação (Opcional)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="input-field pl-12 uppercase"
+                      placeholder="EX: GENIO-123"
+                      value={formData.ref}
+                      onChange={e => setFormData({ ...formData, ref: e.target.value })}
+                      disabled={!!inviteRef}
+                    />
+                    <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-bold ml-1 italic">Ganhe 15 dias de Premium Pro ao usar um código de amigo.</p>
+                </div>
               </motion.div>
             )}
 
@@ -286,16 +307,16 @@ function RegisterForm() {
                 <div className="space-y-2">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Senha de Segurança</label>
                   <div className="relative">
-                    <input 
-                      type={showPassword ? "text" : "password"} 
-                      className="input-field pl-12 pr-12" 
-                      placeholder="Min. 8 caracteres" 
-                      value={formData.password} 
-                      onChange={e => setFormData({ ...formData, password: e.target.value })} 
-                      required 
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="input-field pl-12 pr-12"
+                      placeholder="Min. 8 caracteres"
+                      value={formData.password}
+                      onChange={e => setFormData({ ...formData, password: e.target.value })}
+                      required
                     />
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
@@ -303,23 +324,23 @@ function RegisterForm() {
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
-                  
+
                   {/* Confirm Password */}
                   <div className="mt-6 space-y-2">
                     <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Repetir Senha</label>
                     <div className="relative">
-                      <input 
-                        type={showPassword ? "text" : "password"} 
-                        className={`input-field pl-12 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-500 bg-red-50' : ''}`} 
-                        placeholder="Confirme sua senha" 
-                        value={confirmPassword} 
-                        onChange={e => setConfirmPassword(e.target.value)} 
-                        required 
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className={`input-field pl-12 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-500 bg-red-50' : ''}`}
+                        placeholder="Confirme sua senha"
+                        value={confirmPassword}
+                        onChange={e => setConfirmPassword(e.target.value)}
+                        required
                       />
                       <ShieldCheck className={`absolute left-4 top-1/2 -translate-y-1/2 ${confirmPassword && confirmPassword !== formData.password ? 'text-red-500' : 'text-slate-400'}`} size={20} />
                     </div>
                     {confirmPassword && confirmPassword !== formData.password && (
-                       <p className="text-[10px] text-red-500 font-black uppercase tracking-widest ml-1">As senhas não coincidem</p>
+                      <p className="text-[10px] text-red-500 font-black uppercase tracking-widest ml-1">As senhas não coincidem</p>
                     )}
                   </div>
 

@@ -29,6 +29,62 @@ export interface AIStudyPackage {
 }
 
 // =========================
+// PEDAGOGICAL INSIGHTS
+// =========================
+export const generatePedagogicalInsights = async (params: {
+  studentName: string,
+  performanceData: any
+}): Promise<{ strength: string, weakness: string, suggestion: string }> => {
+  const geminiKey = process.env.GEMINI_API_KEY;
+
+  const prompt = `
+    Analise o desempenho acadêmico do aluno ${params.studentName} e gere insights pedagógicos claros para os pais.
+    
+    DADOS DE DESEMPENHO:
+    ${JSON.stringify(params.performanceData)}
+
+    REGRAS:
+    1. Seja encorajador mas honesto.
+    2. Identifique um PONTO FORTE (Strength).
+    3. Identifique um PONTO DE MELHORIA (Weakness).
+    4. Dê uma SUGESTÃO PRÁTICA de estudo (Suggestion).
+
+    RETORNE APENAS JSON:
+    {
+      "strength": "texto curto",
+      "weakness": "texto curto",
+      "suggestion": "texto curto"
+    }
+  `;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { response_mime_type: "application/json" }
+        })
+      }
+    );
+
+    const result = await res.json();
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Empty AI response");
+    return JSON.parse(text);
+  } catch (err) {
+    console.error('Error generating insights:', err);
+    return {
+      strength: "Demonstra persistência nos tópicos de hoje.",
+      weakness: "Pode melhorar o tempo de foco em sessões longas.",
+      suggestion: "Tente intercalar matérias de exatas com humanas para manter o cérebro engajado."
+    };
+  }
+};
+
+// =========================
 // MAIN
 // =========================
 export const generateStudyContent = async (data: {

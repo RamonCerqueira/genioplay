@@ -28,12 +28,40 @@ export async function GET() {
     // Simulação de MRR: Assinantes * Valor Médio (R$ 47.90)
     const mrr = activeSubs * 47.90;
 
+    // 3. Busca estatísticas de indicações
+    const referralStats = await prisma.user.findMany({
+      where: {
+        referrals: { some: {} }
+      },
+      select: {
+        id: true,
+        username: true,
+        referralCode: true,
+        referrals: {
+          include: {
+            referred: {
+              select: {
+                username: true,
+                createdAt: true,
+                subscription: { select: { status: true } }
+              }
+            }
+          }
+        }
+      },
+      take: 20
+    });
+
+    const totalReferrals = await prisma.referral.count();
+
     return NextResponse.json({
       users,
+      referralStats,
       stats: {
         mrr,
         activeSubs,
-        churnRate: '2.1%', // Cálculo de churn exigiria histórico de cancelamentos
+        totalReferrals,
+        churnRate: '2.1%',
         pendingRequests: 0
       }
     });

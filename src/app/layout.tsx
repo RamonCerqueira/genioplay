@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { NotificationProvider } from "@/components/ui/NotificationSystem";
 
 export const metadata: Metadata = {
@@ -24,6 +25,9 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "GênioPlay",
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
@@ -57,11 +61,13 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="light"
         >
-          <NotificationProvider>
-            <div className="animate-in fade-in duration-1000">
-              {children}
-            </div>
-          </NotificationProvider>
+          <NextAuthProvider>
+            <NotificationProvider>
+              <div className="animate-in fade-in duration-1000">
+                {children}
+              </div>
+            </NotificationProvider>
+          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>

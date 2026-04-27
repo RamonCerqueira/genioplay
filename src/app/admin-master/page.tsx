@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   Users, 
+  Gift,
   DollarSign, 
   ShieldAlert, 
   MessageSquare, 
@@ -35,12 +36,14 @@ function AdminMasterContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab') as 'users' | 'support' | 'finance' | 'settings';
   
-  const [activeTab, setActiveTab] = useState<'users' | 'support' | 'finance' | 'settings'>(tabParam || 'users');
+  const [activeTab, setActiveTab] = useState<'users' | 'support' | 'finance' | 'settings' | 'growth'>(tabParam || 'users');
   const [users, setUsers] = useState<any[]>([]);
+  const [referralStats, setReferralStats] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [stats, setStats] = useState({
     mrr: 0,
     activeSubs: 0,
+    totalReferrals: 0,
     churnRate: '0%',
     pendingRequests: 0
   });
@@ -77,6 +80,7 @@ function AdminMasterContent() {
       const data = await res.json();
       if (data.users) {
         setUsers(data.users);
+        setReferralStats(data.referralStats || []);
         setStats(data.stats);
       }
     } catch (err) {
@@ -203,6 +207,7 @@ function AdminMasterContent() {
            <div className="bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700 flex shadow-sm">
               {[
                 { id: 'users', label: 'Usuários', icon: <Users size={16} /> },
+                { id: 'growth', label: 'Indicações', icon: <Gift size={16} /> },
                 { id: 'support', label: 'Suporte', icon: <MessageSquare size={16} /> },
                 { id: 'finance', label: 'Financeiro', icon: <DollarSign size={16} /> },
                 { id: 'settings', label: 'Integração', icon: <Settings size={16} /> },
@@ -335,6 +340,72 @@ function AdminMasterContent() {
                     </table>
                   </div>
                 )}
+             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'growth' && (
+          <motion.div 
+            key="growth-tab"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="space-y-6"
+          >
+             <div className="flex items-center justify-between">
+                <h2 className="text-xl font-black flex items-center gap-2 text-slate-800 dark:text-white">
+                  <Gift className="text-amber-500" /> 
+                  Performance de Indicações
+                </h2>
+                <div className="px-4 py-2 bg-amber-100 text-amber-700 rounded-2xl text-xs font-black">
+                   {stats.totalReferrals} Indicações Totais
+                </div>
+             </div>
+
+             <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
+                <table className="w-full text-left">
+                   <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                      <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <th className="px-8 py-5">Padrinho (Referrer)</th>
+                        <th className="px-8 py-5">Código</th>
+                        <th className="px-8 py-5">Indicados Ativos</th>
+                        <th className="px-8 py-5 text-right">Status</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {referralStats.map(ref => (
+                        <tr key={ref.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                          <td className="px-8 py-6">
+                             <p className="font-black text-slate-800 dark:text-white">{ref.username}</p>
+                             <p className="text-[10px] text-slate-400 font-bold uppercase">{ref.id}</p>
+                          </td>
+                          <td className="px-8 py-6">
+                             <code className="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-blue-600 font-black text-xs">
+                                {ref.referralCode.slice(0, 8).toUpperCase()}
+                             </code>
+                          </td>
+                          <td className="px-8 py-6">
+                             <div className="flex -space-x-3">
+                                {ref.referrals.map((r: any, idx: number) => (
+                                   <div 
+                                     key={idx} 
+                                     className={`w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center text-[10px] font-black text-white shadow-sm ${r.referred.subscription?.status === 'PREMIUM' ? 'bg-emerald-500' : 'bg-slate-400'}`}
+                                     title={`${r.referred.username} (${r.referred.subscription?.status})`}
+                                   >
+                                      {r.referred.username[0].toUpperCase()}
+                                   </div>
+                                ))}
+                             </div>
+                          </td>
+                          <td className="px-8 py-6 text-right">
+                             <span className="text-xs font-black text-slate-800 dark:text-white">
+                                {ref.referrals.length} Indicações
+                             </span>
+                          </td>
+                        </tr>
+                      ))}
+                   </tbody>
+                </table>
              </div>
           </motion.div>
         )}

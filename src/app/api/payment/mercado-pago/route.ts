@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { getSession } from '@/lib/auth';
 
 // Inicializa o Mercado Pago com o seu Access Token
@@ -12,32 +12,46 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
 
   try {
-    const { amount, description } = await request.json();
+    const { amount, price, description, planId } = await request.json();
+    const finalAmount = Number(price || amount);
 
-    const payment = new Payment(client);
+    if (!finalAmount) {
+      return NextResponse.json({ error: 'Valor inválido' }, { status: 400 });
+    }
+
+    const preference = new Preference(client);
 
     const body = {
-      transaction_amount: Number(amount),
-      description: description || 'Assinatura EduTrack Premium',
-      payment_method_id: 'pix',
+      items: [
+        {
+          id: planId || 'premium_pro',
+          title: description || 'Assinatura GênioPlay Premium Pro',
+          quantity: 1,
+          unit_price: finalAmount,
+          currency_id: 'BRL',
+        }
+      ],
       payer: {
-        email: session.user.email || `${session.user.username}@edutrack.com`,
+        email: session.user.email || `${session.user.username}@genioplay.com.br`,
       },
-      // Referência externa para o nosso Webhook identificar o usuário
       external_reference: session.user.id,
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/webhook`,
+      back_urls: {
+        success: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
+        failure: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=failure`,
+        pending: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=pending`,
+      },
+      auto_return: 'approved' as const,
     };
 
-    const response = await payment.create({ body });
-    const transactionData = (response as any).point_of_interaction?.transaction_data;
+    const response = await preference.create({ body });
 
     return NextResponse.json({
-      qrCodeBase64: transactionData?.qr_code_base64,
-      copyPaste: transactionData?.qr_code,
-      paymentId: response.id
+      init_point: response.init_point,
+      preferenceId: response.id
     });
   } catch (error: any) {
-    console.error('Erro Mercado Pago:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Erro Mercado Pago (Preference):', error);
+    return NextResponse.json({ error: error.message || 'Erro ao gerar link de pagamento' }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GraduationCap, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { SpaceBackground } from '@/components/ui/SpaceBackground';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -44,15 +45,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/20 via-slate-900 to-slate-950">
-      <Link href="/" className="mb-8 flex items-center gap-3 group">
-        <div className="bg-blue-600 p-2.5 rounded-[1.2rem] group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/20 text-white">
-          <GraduationCap size={28} />
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-[#020617]">
+      <SpaceBackground />
+
+      <Link href="/" className="mb-10 flex flex-col items-center gap-4 group relative z-10">
+        <div className="relative">
+          <img
+            src="/icons/icon-512x512.png"
+            alt="GênioPlay Logo"
+            className="w-20 h-20 object-contain rounded-[2rem] shadow-2xl shadow-blue-500/40 group-hover:scale-110 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full -z-10 group-hover:bg-blue-500/30 transition-colors" />
         </div>
-        <span className="text-3xl font-black tracking-tighter text-slate-800 dark:text-white">Gênio<span className="text-blue-600">Play</span></span>
+        <span className="text-4xl font-black tracking-tighter text-white uppercase">Gênio<span className="text-blue-500">Play</span></span>
       </Link>
 
-      <div className="w-full max-w-md space-y-8 premium-card p-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-md space-y-8 premium-card p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] relative overflow-hidden z-10">
         <div className="text-center relative z-10">
           <h2 className="text-4xl font-black text-slate-800 dark:text-white">Bem-vindo</h2>
           <p className="text-slate-500 dark:text-slate-400 font-bold mt-2 text-sm italic">"O sucesso do seu filho começa aqui."</p>

@@ -42,19 +42,24 @@ export async function POST(request: Request) {
       }, { status: 403 });
     }
 
-    // 2. Validar Limite de Lições Mensais
+    // 2. Validar Limite de Lições Mensais (Agora baseado em Tópicos Únicos)
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
-    const lessonCount = await prisma.generatedLesson.count({
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const activeLessonsCount = await prisma.generatedLesson.count({
       where: {
         guardianId: guardianId,
-        createdAt: { gte: startOfMonth }
+        createdAt: { gte: startOfMonth },
+        ...(plan.id === 'free' ? { completed: false } : {}) // Para Free, apenas lições não concluídas contam no limite "ativo"
       }
     });
 
-    if (lessonCount >= plan.maxLessonsPerMonth) {
+    if (activeLessonsCount >= plan.maxLessonsPerMonth) {
       return NextResponse.json({ 
-        error: `Você atingiu o limite de ${plan.maxLessonsPerMonth} lições do seu plano atual. Melhore sua conta para continuar!` 
+        error: plan.id === 'free' 
+          ? `Você já tem ${plan.maxLessonsPerMonth} lições ativas/geradas este mês. Conclua as atuais ou faça upgrade para gerar mais!` 
+          : `Você atingiu o limite de ${plan.maxLessonsPerMonth} lições do seu plano.` 
       }, { status: 403 });
     }
 
@@ -110,7 +115,7 @@ export async function POST(request: Request) {
               })),
               ...aiContent.bonusQuestions.map(q => ({
                 text: q.text,
-                difficulty: 10,
+                difficulty: 99, // Identificador especial para questões bônus
                 explanation: q.explanation,
                 options: {
                   create: q.options.map((opt, i) => ({

@@ -43,7 +43,14 @@ export async function GET(request: Request) {
       subject: topic.subject.name,
       metadata: topic.metadata,
       flashcards: topic.flashcards.map(f => ({ id: f.id, title: f.front, content: f.back })),
-      questions: topic.questions.map(q => ({
+      questions: topic.questions.filter(q => q.difficulty < 99).map(q => ({
+        id: q.id,
+        question: q.text,
+        explanation: q.explanation,
+        options: q.options.map(o => o.text),
+        correct: q.options.findIndex(o => o.isCorrect)
+      })),
+      bonusQuestions: topic.questions.filter(q => q.difficulty === 99).map(q => ({
         id: q.id,
         question: q.text,
         explanation: q.explanation,

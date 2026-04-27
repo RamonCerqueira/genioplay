@@ -35,16 +35,73 @@ export async function POST(request: Request) {
       },
     });
 
-    // Lógica de indicação (Growth)
+    // Lógica de indicação (Growth) - Refinado: 2 por usuário = 30 dias total
     if (ref && role === 'GUARDIAN') {
-      const referrer = await prisma.user.findUnique({ where: { referralCode: ref } });
+      const referrer = await prisma.user.findFirst({ 
+        where: { 
+          referralCode: { contains: ref.trim(), mode: 'insensitive' } 
+        },
+        include: { referrals: true }
+      });
+
       if (referrer) {
+        // 1. Cria o registro de indicação
         await prisma.referral.create({
           data: {
             referrerId: referrer.id,
             referredId: user.id,
+            rewarded: true
           }
         });
+
+        const addDays = (date: Date | null, days: number) => {
+          const result = date ? new Date(date) : new Date();
+          result.setDate(result.getDate() + days);
+          return result;
+        };
+
+        // 2. Benefício para o NOVO usuário (Sempre ganha 15 dias)
+        await prisma.subscription.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            planId: 'referral_welcome',
+            status: 'PREMIUM',
+            currentPeriodEnd: addDays(null, 15)
+          },
+          update: {
+            status: 'PREMIUM',
+            currentPeriodEnd: addDays(null, 15)
+          }
+        });
+
+        // 3. Benefício para o PADRINHO (Limite de 2 indicações = 30 dias)
+        if (referrer.referrals.length < 2) {
+          const referrerSub = await prisma.subscription.findUnique({ where: { userId: referrer.id } });
+          await prisma.subscription.upsert({
+            where: { userId: referrer.id },
+            create: {
+              userId: referrer.id,
+              planId: 'referral_bonus',
+              status: 'PREMIUM',
+              currentPeriodEnd: addDays(null, 15)
+            },
+            update: {
+              status: 'PREMIUM',
+              currentPeriodEnd: addDays(referrerSub?.currentPeriodEnd || null, 15)
+            }
+          });
+
+          // Notifica o padrinho
+          await prisma.notification.create({
+            data: {
+              userId: referrer.id,
+              title: 'Nova Indicação! 🚀',
+              message: `O usuário ${user.username} usou seu código. Você ganhou +15 dias de Premium Pro!`,
+              type: 'MISSION_COMPLETE'
+            }
+          });
+        }
       }
     }
 

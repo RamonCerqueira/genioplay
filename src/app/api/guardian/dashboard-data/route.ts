@@ -12,16 +12,37 @@ export async function GET() {
   }
 
   try {
-    // 1. Busca os filhos vinculados com métricas
+    // 1. Busca os filhos vinculados com métricas e lições recentes
     const familyMembers = await prisma.familyMember.findMany({
       where: { guardianId: session.user.id },
       include: { 
         student: {
           include: {
-            wallet: true,
+            wallet: {
+              include: {
+                history: {
+                  take: 10,
+                  orderBy: { createdAt: 'desc' }
+                }
+              }
+            },
             skillLevels: {
-              take: 3,
+              take: 5,
               orderBy: { updatedAt: 'desc' }
+            },
+            sessions: {
+              take: 5,
+              orderBy: { startTime: 'desc' }
+            },
+            generatedLessons: {
+              where: { completed: true },
+              take: 10,
+              orderBy: { completedAt: 'desc' },
+              include: {
+                topic: {
+                  include: { subject: true }
+                }
+              }
             }
           }
         } 
@@ -30,7 +51,10 @@ export async function GET() {
     const children = familyMembers.map(m => ({
       ...m.student,
       walletBalance: m.student.wallet?.balance || 0,
-      topSkills: m.student.skillLevels
+      transactions: m.student.wallet?.history || [],
+      topSkills: m.student.skillLevels,
+      recentLessons: m.student.generatedLessons,
+      sessions: m.student.sessions
     }));
 
     // 2. Busca alertas recentes de foco (Anti-Cheat)
@@ -53,6 +77,13 @@ export async function GET() {
     // 3. Estatísticas Gerais
     const totalLessons = await prisma.generatedLesson.count({
       where: { guardianId: session.user.id }
+    });
+
+    const completedLessons = await prisma.generatedLesson.count({
+      where: { 
+        guardianId: session.user.id,
+        completed: true
+      }
     });
 
     // Média de acertos global
@@ -78,6 +109,7 @@ export async function GET() {
       })),
       stats: {
         totalLessons,
+        completedLessons,
         averageScore,
         subscriptionStatus: sub?.status || 'FREE'
       }

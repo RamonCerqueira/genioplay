@@ -13,44 +13,44 @@ import {
 
 const benefits = [
   { 
-    icon: ShieldCheck, 
-    title: "Anti-Cheat 360°", 
-    desc: "Nossa IA detecta desvios de foco instantaneamente. Se o aluno trocar de aba ou usar o celular, você é notificado.",
-    color: "text-blue-600",
-    bg: "bg-blue-50 dark:bg-blue-900/20"
+    icon: Target, 
+    title: "Meta Épica em Família", 
+    desc: "Transforme grandes sonhos em realidade através de um mosaico interativo. Cada lição concluída revela uma peça do prêmio final.",
+    color: "text-amber-600",
+    bg: "bg-amber-50 dark:bg-amber-900/20"
   },
   { 
     icon: Bot, 
-    title: "Tutor Gênio 24/7", 
-    desc: "Um assistente pessoal que tira dúvidas pedagógicas usando a inteligência do Gemini, com linguagem para crianças.",
+    title: "Mentor IA para Pais", 
+    desc: "Não apenas dados, mas conselhos. Nossa IA analisa o perfil do seu filho e sugere ações proativas para melhorar o aprendizado.",
     color: "text-indigo-600",
     bg: "bg-indigo-50 dark:bg-indigo-900/20"
   },
   { 
     icon: Zap, 
-    title: "Gamificação Real", 
-    desc: "O esforço gera GênioCoins. Seu filho conquista moedas que podem ser trocadas por prêmios reais definidos por você.",
-    color: "text-orange-600",
-    bg: "bg-orange-50 dark:bg-orange-900/20"
+    title: "Modo Hyperfocus", 
+    desc: "Dispare desafios relâmpago do seu celular. Motivação instantânea com bônus de XP e moedas em dobro por tempo limitado.",
+    color: "text-blue-600",
+    bg: "bg-blue-50 dark:bg-blue-900/20"
   },
   { 
-    icon: BrainCircuit, 
-    title: "IA Adaptativa", 
-    desc: "O sistema identifica as fraquezas do aluno e gera exercícios focados no que ele realmente precisa aprender.",
+    icon: ShieldCheck, 
+    title: "Anti-Cheat Inteligente", 
+    desc: "Foco total garantido. O sistema detecta distrações e bloqueia o progresso se o aluno sair da zona de estudo.",
     color: "text-emerald-600",
     bg: "bg-emerald-50 dark:bg-emerald-900/20"
   },
   { 
     icon: BarChart3, 
-    title: "Relatórios de Elite", 
-    desc: "Receba métricas detalhadas sobre o desempenho, tempo de foco e evolução por matéria direto no seu celular.",
+    title: "Boletim Gênio", 
+    desc: "Relatórios de elite com métricas de proficiência (ELO) por matéria, tempo de foco e evolução histórica detalhada.",
     color: "text-rose-600",
     bg: "bg-rose-50 dark:bg-rose-900/20"
   },
   { 
-    icon: Target, 
-    title: "Missões Personalizadas", 
-    desc: "Crie objetivos de estudo semanais e veja seu filho se transformar em um mestre do conhecimento.",
+    icon: BrainCircuit, 
+    title: "IA Adaptativa", 
+    desc: "O conteúdo se molda ao ritmo do aluno, focando nas lacunas de conhecimento para um aprendizado sem frustrações.",
     color: "text-cyan-600",
     bg: "bg-cyan-50 dark:bg-cyan-900/20"
   }

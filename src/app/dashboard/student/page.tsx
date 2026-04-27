@@ -5,9 +5,15 @@ import { StudentHeader } from '@/components/dashboard/student/StudentHeader';
 import { TutorChat } from '@/components/dashboard/student/TutorChat';
 import { DailyMissions } from '@/components/dashboard/student/DailyMissions';
 import { StatsCards } from '@/components/dashboard/student/StatsCards';
+import { BadgeGallery } from '@/components/dashboard/student/BadgeGallery';
+import { BadgeAchievement } from '@/components/dashboard/student/BadgeAchievement';
+import { EpicGoalTracker } from '@/components/dashboard/student/EpicGoalTracker';
+import { HyperfocusAlert } from '@/components/dashboard/student/HyperfocusAlert';
 
 export default function StudentDashboard() {
   const [lessons, setLessons] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [newBadgeCelebration, setNewBadgeCelebration] = useState<any>(null);
   const [studentName, setStudentName] = useState('Estudante');
   const [stats, setStats] = useState({
     balance: 0,
@@ -23,6 +29,13 @@ export default function StudentDashboard() {
       .then(data => {
         if (data) {
           setLessons(data.lessons || []);
+          
+          // Detecta nova conquista
+          if (badges.length > 0 && data.badges && data.badges.length > badges.length) {
+            setNewBadgeCelebration(data.badges[data.badges.length - 1]);
+          }
+          
+          setBadges(data.badges || []);
           setStudentName(data.username || 'Estudante');
           setStats(prev => ({ 
             ...prev, 
@@ -34,7 +47,7 @@ export default function StudentDashboard() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [badges.length]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -56,11 +69,14 @@ export default function StudentDashboard() {
           />
         </div>
 
+        <EpicGoalTracker />
+
         <div className="grid lg:grid-cols-12 gap-10">
           
           {/* Coluna da Esquerda: Estatísticas */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 space-y-8">
             <StatsCards streak={stats.streak} walletBalance={stats.balance} />
+            <BadgeGallery badges={badges} />
           </div>
 
           {/* Coluna da Direita: Missões do Dia */}
@@ -71,6 +87,13 @@ export default function StudentDashboard() {
           </div>
         </div>
       </div>
+
+      <BadgeAchievement 
+        newBadge={newBadgeCelebration} 
+        onComplete={() => setNewBadgeCelebration(null)} 
+      />
+
+      <HyperfocusAlert />
 
       {/* Tutor Gênio Flutuante */}
       <TutorChat />

@@ -8,16 +8,16 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dbe9sl966/image/upload/v1713912000/genioplay_icon_512.png",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "https://res.cloudinary.com/dbe9sl966/image/upload/v1713912000/genioplay_icon_192.png",
-      "sizes": "192x192",
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }

@@ -12,9 +12,14 @@ export default function LandingNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 md:h-24 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 md:p-2.5 rounded-xl md:rounded-2xl text-white shadow-xl shadow-blue-500/20">
-            <BrainCircuit size={24} className="md:w-7 md:h-7" />
+        <div className="flex items-center gap-3 group cursor-pointer">
+          <div className="relative">
+            <img 
+              src="/icons/icon-512x512.png" 
+              alt="GênioPlay Logo" 
+              className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-2xl shadow-2xl shadow-blue-500/20 group-hover:scale-110 transition-transform duration-500" 
+            />
+            <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full -z-10 group-hover:bg-blue-500/20 transition-colors" />
           </div>
           <span className="text-xl md:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Gênio<span className="text-blue-600">Play</span></span>
         </div>

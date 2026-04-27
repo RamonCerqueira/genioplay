@@ -10,7 +10,7 @@ export default function ReferralPage() {
   const [referralCode, setReferralCode] = useState('EDU-RAMON-2024'); // Viria do DB
   const [referralCount, setReferralCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const MAX_REFERRALS = 5;
+  const MAX_REFERRALS = 2;
 
   useEffect(() => {
     fetch('/api/guardian/referrals/count')
@@ -39,7 +39,7 @@ export default function ReferralPage() {
           <Gift size={40} />
         </div>
         <h1 className="text-4xl font-black text-slate-800 dark:text-white">Traga outros Pais</h1>
-        <p className="text-slate-500 font-bold text-lg">Compartilhe o EduTrack e ganhe bônus exclusivos. (Máximo de 5 indicações)</p>
+        <p className="text-slate-500 font-bold text-lg">Compartilhe o GênioPlay e ganhe bônus exclusivos. (Máximo de 2 indicações)</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -50,7 +50,7 @@ export default function ReferralPage() {
               <Share2 className="text-blue-600" size={24} /> Seu Link de Convite
             </h2>
             <p className="text-slate-400 text-sm font-bold leading-relaxed">
-              Cada pai que assinar usando seu link, você ganha 1 mês de Premium grátis e ele ganha 20% de desconto no GênioPlay.
+              Cada pai que assinar usando seu código, você ganha 15 dias de Premium grátis e ele também ganha 15 dias. (Limite de 2 indicações = 30 dias total).
             </p>
           </div>
 
@@ -76,10 +76,59 @@ export default function ReferralPage() {
           )}
         </div>
 
+        {/* Card de Ativação (Para quem foi indicado) */}
+        <div className="premium-card p-10 space-y-8 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border-none shadow-2xl">
+          <div className="space-y-4">
+            <h2 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+              <Sparkles className="text-amber-500" size={24} /> Ativar Código
+            </h2>
+            <p className="text-slate-400 text-sm font-bold leading-relaxed">
+              Foi indicado por um amigo? Digite o código dele aqui para ganhar 15 dias de Premium grátis imediatamente!
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="relative">
+              <Gift className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder="EX: GENIO-123"
+                className="input-field pl-12 uppercase"
+                id="activation-code"
+              />
+            </div>
+            <button
+              onClick={async () => {
+                const code = (document.getElementById('activation-code') as HTMLInputElement).value;
+                if (!code) return;
+                
+                try {
+                  const res = await fetch('/api/referral/activate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    notify({ title: 'Código Ativado! 🎉', message: data.message, type: 'SUCCESS' });
+                  } else {
+                    notify({ title: 'Erro', message: data.error, type: 'WARNING' });
+                  }
+                } catch (err) {
+                  notify({ title: 'Erro', message: 'Falha na conexão', type: 'WARNING' });
+                }
+              }}
+              className="w-full py-4 bg-slate-800 hover:bg-slate-950 text-white font-black rounded-2xl transition-all shadow-xl shadow-slate-900/20"
+            >
+              Ativar Benefício
+            </button>
+          </div>
+        </div>
+
         {/* Card de Progresso */}
         <div className="premium-card p-10 space-y-8">
           <h2 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-            <Users className="text-blue-600" size={24} /> Progresso ({referralCount}/{MAX_REFERRALS})
+            <Users className="text-blue-600" size={24} /> Seus Convidados ({referralCount}/{MAX_REFERRALS})
           </h2>
 
           <div className="space-y-6">
@@ -91,14 +140,14 @@ export default function ReferralPage() {
                 </div>
                 <div className="flex-1">
                   <p className={`text-sm font-black ${i < referralCount ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}>
-                    Indicação {i + 1}
+                    {i < referralCount ? 'Usuário Ativo' : `Indicação ${i + 1}`}
                   </p>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     {i < referralCount ? 'Completado! 🎉' : 'Aguardando convite'}
                   </p>
                 </div>
                 {i < referralCount && (
-                  <div className="text-xs font-black text-emerald-500">+1 Mês Grátis</div>
+                  <div className="text-xs font-black text-emerald-500">+15 Dias Grátis</div>
                 )}
               </div>
             ))}

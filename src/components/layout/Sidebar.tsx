@@ -68,8 +68,13 @@ export default function Sidebar({
 
       {/* Logo */}
       <div className={`flex items-center gap-3 px-2 mb-12 ${isCollapsed ? 'justify-center' : ''}`}>
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2.5 rounded-2xl shadow-xl shadow-blue-500/30 text-white transform hover:rotate-6 transition-transform">
-          <GraduationCap size={isCollapsed ? 28 : 24} />
+        <div className="relative group">
+          <img 
+            src="/icons/icon-512x512.png" 
+            alt="Logo" 
+            className={`${isCollapsed ? "w-12 h-12" : "w-10 h-10"} object-contain rounded-2xl shadow-xl shadow-blue-500/10 group-hover:scale-110 transition-transform duration-500`} 
+          />
+          <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full -z-10" />
         </div>
         {!isCollapsed && (
           <motion.span
