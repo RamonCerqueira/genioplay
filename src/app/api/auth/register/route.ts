@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { login } from '@/lib/auth';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/mail';
-import { handleApiError } from '@/lib/api-errors';
+import { handleApiError } from '@/lib/api-error';
 
 export async function POST(request: Request) {
   try {
