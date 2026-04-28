@@ -26,6 +26,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "GênioPlay",
   },
+  icons: {
+    icon: "/icons/icon-512x512.png",
+    apple: "/icons/icon-512x512.png",
+  },
   formatDetection: {
     telephone: false,
   },
