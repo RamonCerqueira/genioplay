@@ -14,7 +14,7 @@ export async function GET() {
       where: {
         userId: session.user.id,
         type: 'BADGE_EARNED',
-        isRead: false
+        read: false
       },
       orderBy: { createdAt: 'asc' }
     });
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     if (notificationId) {
       await prisma.notification.update({
         where: { id: notificationId },
-        data: { isRead: true }
+        data: { read: true }
       });
     }
 
