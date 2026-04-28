@@ -15,10 +15,10 @@ export default async function SubscriptionPage() {
   // Buscar usuário para saber o status atual
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true }
+    include: { subscription: true }
   });
 
-  const isPro = user?.subscriptionStatus === 'PRO';
+  const isPro = user?.subscription?.status === 'PREMIUM';
 
   return (
     <div className="max-w-5xl mx-auto space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
