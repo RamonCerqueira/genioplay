@@ -45,11 +45,12 @@ export default function Sidebar({
     { icon: Users, label: 'Família', href: '/dashboard/family' },
     { icon: TrendingUp, label: 'Relatórios', href: '/dashboard/reports' },
     { icon: Gift, label: 'Recompensas', href: '/dashboard/settings' },
-    { icon: CreditCard, label: 'Assinatura', href: '/pricing' },
+    { icon: CreditCard, label: 'Assinatura', href: '/dashboard/subscription' },
     { icon: HelpCircle, label: 'Ajuda', href: '/dashboard/help' },
   ] : [
     { icon: LayoutDashboard, label: 'Missões', href: '/dashboard' },
     { icon: GraduationCap, label: 'Estudar', href: '/dashboard/study' },
+    { icon: ShieldCheck, label: 'Conquistas', href: '/dashboard/student/badges' },
     { icon: Gift, label: 'Loja', href: '/dashboard/rewards' },
   ];
 

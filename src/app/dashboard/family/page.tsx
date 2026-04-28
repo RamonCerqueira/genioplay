@@ -290,27 +290,29 @@ export default function FamilyPage() {
               className="w-full max-w-6xl h-[90vh] bg-white dark:bg-slate-900 rounded-[3rem] shadow-3xl relative z-[101] overflow-hidden flex flex-col md:flex-row"
             >
               {/* Sidebar do Perfil */}
-              <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-800/50 border-r border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center">
-                <div className="relative mb-8">
-                  <div className="w-32 h-32 bg-white dark:bg-slate-800 rounded-[2.5rem] flex items-center justify-center text-6xl shadow-2xl border-4 border-white dark:border-slate-700">
-                    {newChild.avatar}
+              <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-800/50 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 p-4 md:p-8 flex flex-col items-center shrink-0">
+                <div className="flex md:flex-col items-center gap-4 md:gap-0 w-full md:w-auto">
+                  <div className="relative mb-0 md:mb-8 shrink-0">
+                    <div className="w-16 h-16 md:w-32 md:h-32 bg-white dark:bg-slate-800 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-3xl md:text-6xl shadow-xl border-2 md:border-4 border-white dark:border-slate-700">
+                      {newChild.avatar}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-6 h-6 md:w-10 md:h-10 bg-blue-600 text-white rounded-lg md:rounded-2xl flex items-center justify-center shadow-lg border-2 md:border-4 border-slate-50 dark:border-slate-800">
+                      <Star size={12} className="md:w-4 md:h-4" fill="currentColor" />
+                    </div>
                   </div>
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg border-4 border-slate-50 dark:border-slate-800">
-                    <Star size={16} fill="currentColor" />
-                  </div>
-                </div>
 
-                <div className="text-center mb-10">
-                  <h2 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
-                    {newChild.username || 'Novo Aluno'}
-                  </h2>
-                  <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mt-1">
-                    {newChild.gradeLevel || 'Sem série'}
-                  </p>
+                  <div className="text-left md:text-center md:mb-10 flex-1">
+                    <h2 className="text-lg md:text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                      {newChild.username || 'Novo Aluno'}
+                    </h2>
+                    <p className="text-[10px] md:text-xs font-bold text-blue-600 uppercase tracking-widest mt-1">
+                      {newChild.gradeLevel || 'Sem série'}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Tabs / Menu Navigation */}
-                <div className="w-full space-y-2">
+                <div className="w-full flex md:flex-col gap-2 overflow-x-auto custom-scrollbar pb-2 md:pb-0 mt-4 md:mt-0">
                   <TabButton
                     active={activeTab === 'perfil'}
                     onClick={() => setActiveTab('perfil')}
@@ -347,7 +349,7 @@ export default function FamilyPage() {
                   )}
                 </div>
 
-                <div className="mt-auto pt-10 w-full">
+                <div className="hidden md:flex mt-auto pt-10 w-full">
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="w-full py-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-black rounded-2xl transition-all flex items-center justify-center gap-2"
@@ -358,7 +360,14 @@ export default function FamilyPage() {
               </div>
 
               {/* Área de Conteúdo Central */}
-              <div className="flex-1 overflow-y-auto p-8 md:p-12 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-4 md:p-12 custom-scrollbar relative">
+                {/* Fechar Mobile */}
+                <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="md:hidden absolute top-4 right-4 w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 z-10"
+                >
+                  <X size={18} />
+                </button>
                 <AnimatePresence mode="wait">
                   {activeTab === 'perfil' && (
                     <motion.div
@@ -368,8 +377,8 @@ export default function FamilyPage() {
                       exit={{ opacity: 0, x: -20 }}
                       className="max-w-2xl mx-auto"
                     >
-                      <div className="mb-10 flex justify-between items-center">
-                        <h3 className="text-3xl font-black text-slate-800 dark:text-white">Dados do Gênio</h3>
+                      <div className="mb-8 md:mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <h3 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white pr-10 md:pr-0">Dados do Gênio</h3>
                         <div className="flex gap-2">
                           {avatars.map(a => (
                             <button
@@ -689,18 +698,18 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
     <button
       onClick={onClick}
       className={`
-        w-full p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 group
+        w-auto md:w-full p-3 md:p-4 rounded-xl md:rounded-2xl flex items-center gap-2 md:gap-4 transition-all duration-300 group shrink-0
         ${active
-          ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30'
-          : 'bg-transparent text-slate-500 hover:bg-white dark:hover:bg-slate-800 hover:text-blue-600'
+          ? 'bg-blue-600 text-white shadow-lg md:shadow-xl shadow-blue-500/30'
+          : 'bg-slate-100 dark:bg-slate-800/50 md:bg-transparent text-slate-500 hover:bg-white dark:hover:bg-slate-800 hover:text-blue-600'
         }
       `}
     >
       <div className={`transition-transform duration-500 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
         {icon}
       </div>
-      <span className="text-sm font-black uppercase tracking-tight">{label}</span>
-      {active && <ChevronRight className="ml-auto" size={16} />}
+      <span className="text-xs md:text-sm font-black uppercase tracking-tight whitespace-nowrap">{label}</span>
+      {active && <ChevronRight className="hidden md:block ml-auto" size={16} />}
     </button>
   );
 }

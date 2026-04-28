@@ -87,13 +87,10 @@ export default function HeroAnimation() {
           rotate: [0, 5, 0],
         }}
         transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        className="relative z-30 w-48 h-48 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-[3rem] shadow-2xl shadow-blue-500/40 flex items-center justify-center group"
+        className="relative z-30 w-48 h-48 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl shadow-2xl shadow-blue-500/40 flex items-center justify-center group"
       >
-        <div className="absolute inset-0 rounded-[3rem] bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-2xl">
-          <path d="M12 5V3m0 18v-2M7.05 7.05 5.636 5.636m12.728 12.728-1.414-1.414M5 12H3m18 0h-2M7.05 16.95l-1.414 1.414M18.364 5.636l-1.414 1.414M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
+        <div className="absolute inset-0 rounded-3xl bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+        <img src="/icons/icon-512x512.png" alt="Logo GênioPlay" className="w-24 h-24 object-contain drop-shadow-2xl" />
 
         {/* Orbiting particles */}
         {[...Array(3)].map((_, i) => (

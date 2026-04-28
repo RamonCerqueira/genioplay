@@ -14,7 +14,7 @@ export default async function LessonPage({ params }: { params: { lessonId: strin
     include: { topic: true }
   });
 
-  if (!lesson) redirect('/dashboard');
+  if (!lesson || lesson.completed) redirect('/dashboard/student');
 
   // Verifica se já existe uma sessão em progresso para esta lição
   let studySession = await prisma.studySession.findFirst({

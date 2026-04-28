@@ -150,7 +150,7 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
           const finalScore = Math.round((quizScore / (sessionData.questions.length + (isBonusMode ? sessionData.bonusQuestions.length : 0))) * 100);
           const totalCoins = quizScore * 5;
 
-          fetch('/api/study/complete-lesson', {
+          await fetch('/api/study/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 

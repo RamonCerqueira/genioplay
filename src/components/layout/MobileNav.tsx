@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react';
-import { LucideIcon, LayoutDashboard, BookOpen, Gift, Users, LogOut } from 'lucide-react';
+import { LucideIcon, LayoutDashboard, BookOpen, Gift, Users, LogOut, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from './ThemeToggle';
@@ -52,6 +52,7 @@ export default function MobileNav({ role }: { role: 'STUDENT' | 'GUARDIAN' | 'AD
       {currentRole === 'STUDENT' ? (
         <>
           <NavItem href="/dashboard/study" icon={BookOpen} label="Estudar" active={pathname.includes('/study')} />
+          <NavItem href="/dashboard/student/badges" icon={ShieldCheck} label="Conquistas" active={pathname.includes('/badges')} />
           <NavItem href="/dashboard/rewards" icon={Gift} label="Loja" active={pathname.includes('/rewards')} />
         </>
       ) : (

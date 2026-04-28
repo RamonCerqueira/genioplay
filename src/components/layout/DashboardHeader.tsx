@@ -23,10 +23,6 @@ export function DashboardHeader() {
         </div>
         
         <NotificationBell />
-
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-           <span className="text-xs font-black">G</span>
-        </div>
       </div>
     </header>
   );

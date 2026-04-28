@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileNav from "@/components/layout/MobileNav";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { BadgeUnlockModal } from "@/components/dashboard/BadgeUnlockModal";
 
 export default async function DashboardLayout({
   children,
@@ -36,6 +37,9 @@ export default async function DashboardLayout({
         {/* Navegação Mobile */}
         <MobileNav role={session.user.role} />
       </div>
+
+      {/* Modal Global de Conquistas (Apenas para Alunos) */}
+      {session.user.role === 'STUDENT' && <BadgeUnlockModal />}
     </div>
   );
 }

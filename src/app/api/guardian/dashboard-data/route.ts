@@ -35,9 +35,8 @@ export async function GET() {
               orderBy: { startTime: 'desc' }
             },
             generatedLessons: {
-              where: { completed: true },
               take: 10,
-              orderBy: { completedAt: 'desc' },
+              orderBy: { createdAt: 'desc' },
               include: {
                 topic: {
                   include: { subject: true }
