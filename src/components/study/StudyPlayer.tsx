@@ -129,7 +129,7 @@ export default function StudyPlayer({ sessionId }: StudyPlayerProps) {
       grantReward(5, 'QUIZ_BONUS');
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setSelectedOption(null);
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(prev => prev + 1);
